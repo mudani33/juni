@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand Colors */
+  --color-sage: #5a8f6a;
+  --color-sage-soft: #8fb89e;
+  --color-sage-bg: #f0f7f2;
+  --color-gold: #c4915e;
+  --color-gold-bg: #fdf5ee;
+  --color-cream: #faf8f5;
+  --color-warm-white: #fffdf9;
+  --color-border: #e8e2d9;
+  --color-bg: #f0ebe4;
+  --color-purple: #7a6fa0;
+  --color-purple-bg: #f0f0f7;
+  --color-dark: #1a1a1a;
+  --color-txt: #3a3a3a;
+  --color-mid: #555555;
+  --color-muted: #888888;
+  --color-light: #aaaaaa;
+  --color-faint: #bbbbbb;
+  --color-brown: #6b5e4f;
+  --color-tan: #d4b896;
+  --color-blue: #4a7c9b;
+  --color-blue-bg: #eef5fa;
+  --color-amber: #b8860b;
+  --color-amber-bg: #fdf8ed;
+  --color-danger: #c0392b;
+  --color-danger-bg: #fdecea;
+
+  /* Font families */
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+
+  /* Animations */
+  --animate-fade-in: fade-in 0.5s ease-out;
+  --animate-slide-up: slide-up 0.4s ease-out;
+  --animate-slide-down: slide-down 0.3s ease-out;
+  --animate-scale-in: scale-in 0.3s ease-out;
+  --animate-pulse-soft: pulse-soft 2s infinite;
+}
+
+/* Keyframes */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Base styles */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: var(--font-sans);
+  background: var(--color-cream);
+  color: var(--color-txt);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--color-sage);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Selection */
+::selection {
+  background: var(--color-sage-bg);
+  color: var(--color-dark);
+}
