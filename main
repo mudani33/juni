@@ -86,6 +86,46 @@ const training = [
 
 const fStats = {hours:486,stories:67,rating:4.8,seniors:3,tier:"Senior Fellow",monthly:[32,35,38,40,42,44,46,44,48,46,50,52]};
 
+// ── Background Check Tool Definitions & Onboarding Data ──
+const BG_CHECK_STATUS = { PENDING:"Pending", IN_PROGRESS:"In Progress", PASSED:"Passed", FAILED:"Failed", EXPIRED:"Expired", WAIVER:"Waiver Required" };
+
+const bgCheckTools = [
+  {id:"identity",name:"Identity Verification",desc:"Government-issued ID validation and address history",provider:"Checkr Verified",required:true,estimatedDays:"1-2 days",icon:"\uD83C\uDD94"},
+  {id:"criminal",name:"Criminal Background Check",desc:"Federal, state, and county criminal records search",provider:"Checkr National",required:true,estimatedDays:"3-5 days",icon:"\uD83D\uDD0D"},
+  {id:"sex_offender",name:"Sex Offender Registry",desc:"National Sex Offender Public Website (NSOPW) search",provider:"NSOPW Direct",required:true,estimatedDays:"1-2 days",icon:"\uD83D\uDEE1\uFE0F"},
+  {id:"elder_abuse",name:"Elder Abuse Registry",desc:"State elder abuse and neglect registry check",provider:"State Registry API",required:true,estimatedDays:"3-7 days",icon:"\uD83D\uDC74"},
+  {id:"driving",name:"Motor Vehicle Records",desc:"Driving record check for transportation-eligible Fellows",provider:"DMV Connect",required:false,estimatedDays:"1-3 days",icon:"\uD83D\uDE97"},
+  {id:"references",name:"Professional References",desc:"Minimum 3 professional references verified via phone/email",provider:"Internal Review",required:true,estimatedDays:"5-7 days",icon:"\uD83D\uDCDE"},
+  {id:"education",name:"Education Verification",desc:"Degree and certification validation",provider:"National Student Clearinghouse",required:false,estimatedDays:"2-4 days",icon:"\uD83C\uDF93"},
+  {id:"drug_screen",name:"Drug Screening",desc:"10-panel drug test at authorized lab",provider:"Quest Diagnostics",required:true,estimatedDays:"2-3 days",icon:"\uD83E\uDDEA"},
+];
+
+const onboardingSteps = [
+  {id:"consent",title:"Authorization & Consent",desc:"Review and sign background check authorization"},
+  {id:"identity_info",title:"Personal Information",desc:"Verify your identity and provide required details"},
+  {id:"documents",title:"Document Upload",desc:"Upload government-issued ID and supporting documents"},
+  {id:"references_input",title:"Reference Submission",desc:"Provide professional and personal references"},
+  {id:"screening",title:"Screening Appointment",desc:"Schedule drug screening and any required in-person checks"},
+  {id:"review",title:"Review & Status",desc:"Track the progress of all background checks"},
+];
+
+// Mock data for a Fellow mid-onboarding (new Fellow perspective)
+const newFellowProfile = {
+  name:"Jordan Rivera", email:"jordan.r@email.com", phone:"(555) 234-5678",
+  appliedDate:"January 28, 2026", status:"onboarding",
+};
+
+const mockBgCheckResults = {
+  identity:{status:BG_CHECK_STATUS.PASSED,completedDate:"Feb 1, 2026",details:"Identity confirmed via state-issued driver's license."},
+  criminal:{status:BG_CHECK_STATUS.PASSED,completedDate:"Feb 4, 2026",details:"No records found across federal, state, and county databases."},
+  sex_offender:{status:BG_CHECK_STATUS.PASSED,completedDate:"Feb 1, 2026",details:"No matches found in NSOPW database."},
+  elder_abuse:{status:BG_CHECK_STATUS.IN_PROGRESS,completedDate:null,details:"Awaiting response from state registry. Estimated completion: Feb 10."},
+  driving:{status:BG_CHECK_STATUS.PENDING,completedDate:null,details:"Not yet initiated. Optional for non-transport Fellows."},
+  references:{status:BG_CHECK_STATUS.IN_PROGRESS,completedDate:null,details:"2 of 3 references verified. Awaiting response from third contact."},
+  education:{status:BG_CHECK_STATUS.PASSED,completedDate:"Feb 3, 2026",details:"B.S. in Social Work confirmed, University of Michigan, 2022."},
+  drug_screen:{status:BG_CHECK_STATUS.PASSED,completedDate:"Feb 2, 2026",details:"10-panel screen completed. All results negative."},
+};
+
 const posts = [
   {id:1,who:"Maya R.",av:"MR",txt:"Breakthrough moment today \u2014 Mr. Torres sang along to a song he hadn\u2019t remembered in months. The power of music never ceases to amaze.",likes:24,time:"2h ago"},
   {id:2,who:"James K.",av:"JK",txt:"Anyone have tips for when a Senior doesn\u2019t want to engage? Eleanor was really quiet today and I want to respect her space while still being present.",likes:18,time:"5h ago",replies:7},
@@ -277,6 +317,397 @@ function VibeCheck({onDone}){
       <div style={{display:"flex",justifyContent:"space-between",marginTop:40}}>
         <button onClick={()=>step>0&&setStep(step-1)} style={{padding:"12px 28px",borderRadius:10,border:`1px solid ${C.border}`,background:"transparent",color:C.muted,fontFamily:F.sans,fontSize:14,fontWeight:500,cursor:step>0?"pointer":"default",opacity:step>0?1:0.3}}>Back</button>
         <button onClick={()=>step<steps.length-1?setStep(step+1):onDone()} style={{padding:"12px 32px",borderRadius:10,border:"none",background:C.sage,color:"white",fontFamily:F.sans,fontSize:14,fontWeight:600,cursor:"pointer",boxShadow:`0 4px 12px ${C.sage}40`}}>{step<steps.length-1?"Continue":"Find My Match"}</button>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+//  FELLOW ONBOARDING — Strict Background Check Flow
+// ═══════════════════════════════════════════
+
+function CheckStatusBadge({status}){
+  const map={
+    [BG_CHECK_STATUS.PASSED]:{color:C.sage,bg:C.sageBg,icon:"\u2713"},
+    [BG_CHECK_STATUS.FAILED]:{color:"#c0392b",bg:"#fdecea",icon:"\u2717"},
+    [BG_CHECK_STATUS.IN_PROGRESS]:{color:C.blue,bg:C.blueBg,icon:"\u25CB"},
+    [BG_CHECK_STATUS.PENDING]:{color:C.muted,bg:C.bg,icon:"\u2014"},
+    [BG_CHECK_STATUS.EXPIRED]:{color:C.amber,bg:C.amberBg,icon:"\u26A0"},
+    [BG_CHECK_STATUS.WAIVER]:{color:C.purple,bg:C.purpleBg,icon:"!"},
+  };
+  const s=map[status]||map[BG_CHECK_STATUS.PENDING];
+  return <span style={{padding:"4px 14px",borderRadius:16,fontSize:11,fontWeight:700,color:s.color,background:s.bg,display:"inline-flex",alignItems:"center",gap:4}}><span>{s.icon}</span> {status}</span>;
+}
+
+function StrictGate({passed,total,requiredPassed,requiredTotal,children}){
+  const allRequiredPassed=requiredPassed>=requiredTotal;
+  if(!allRequiredPassed){
+    return(
+      <Card style={{padding:40,textAlign:"center",border:`2px solid #c0392b20`}}>
+        <div style={{fontSize:48,marginBottom:16}}>{"\uD83D\uDEE1\uFE0F"}</div>
+        <h2 style={{fontFamily:F.serif,fontSize:24,fontWeight:600,color:C.dark,margin:"0 0 12px"}}>Background Checks Incomplete</h2>
+        <p style={{fontSize:15,color:C.mid,fontWeight:300,lineHeight:1.6,margin:"0 0 20px",maxWidth:480,marginInline:"auto"}}>
+          All required background checks must pass before you can access the Fellow portal. This is a non-negotiable safety requirement to protect our seniors.
+        </p>
+        <div style={{display:"flex",justifyContent:"center",gap:24,marginBottom:24}}>
+          <Stat label="Required Checks" value={`${requiredPassed}/${requiredTotal}`} color={requiredPassed===requiredTotal?C.sage:"#c0392b"}/>
+          <Stat label="Optional Checks" value={`${passed-requiredPassed}/${total-requiredTotal}`} color={C.blue}/>
+        </div>
+        <Bar value={(requiredPassed/requiredTotal)*100} color={requiredPassed===requiredTotal?C.sage:"#c0392b"} h={8}/>
+        <p style={{fontSize:12,color:C.light,margin:"12px 0 0"}}>Required: {requiredPassed} of {requiredTotal} passed</p>
+      </Card>
+    );
+  }
+  return children;
+}
+
+function BackgroundCheckDashboard({checks,results,onBack}){
+  const requiredChecks=checks.filter(c=>c.required);
+  const requiredPassed=requiredChecks.filter(c=>results[c.id]?.status===BG_CHECK_STATUS.PASSED).length;
+  const totalPassed=checks.filter(c=>results[c.id]?.status===BG_CHECK_STATUS.PASSED).length;
+  const allRequiredPassed=requiredPassed===requiredChecks.length;
+  const hasFailure=checks.some(c=>c.required&&results[c.id]?.status===BG_CHECK_STATUS.FAILED);
+
+  return(
+    <div style={{maxWidth:720,margin:"0 auto",padding:24}}>
+      {onBack&&<button onClick={onBack} style={{background:"none",border:"none",color:C.blue,fontFamily:F.sans,fontSize:14,fontWeight:500,cursor:"pointer",marginBottom:24,padding:0}}>{"\u2190"} Back</button>}
+
+      {/* Overall Status Banner */}
+      <Card style={{marginBottom:24,padding:"28px 32px",background:allRequiredPassed?"linear-gradient(135deg,#f0f7f2,#e8f5e8)":hasFailure?"linear-gradient(135deg,#fdecea,#fbe9e7)":"linear-gradient(135deg,#eef5fa,#e3f2fd)",border:`2px solid ${allRequiredPassed?C.sage:hasFailure?"#c0392b":C.blue}20`}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:16}}>
+          <div>
+            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:8}}>
+              <span style={{fontSize:28}}>{allRequiredPassed?"\u2705":hasFailure?"\u274C":"\u23F3"}</span>
+              <h2 style={{fontFamily:F.serif,fontSize:22,fontWeight:600,color:C.dark,margin:0}}>
+                {allRequiredPassed?"Clearance Approved":hasFailure?"Action Required":"Checks In Progress"}
+              </h2>
+            </div>
+            <p style={{fontSize:14,color:C.mid,fontWeight:300,margin:0}}>
+              {allRequiredPassed?"All required background checks have passed. You are cleared to begin.":hasFailure?"One or more required checks have failed. Please contact onboarding support.":"Your background checks are being processed. We'll notify you when complete."}
+            </p>
+          </div>
+          <div style={{display:"flex",gap:20}}>
+            <Stat label="Required" value={`${requiredPassed}/${requiredChecks.length}`} color={allRequiredPassed?C.sage:"#c0392b"}/>
+            <Stat label="Total" value={`${totalPassed}/${checks.length}`} color={C.blue}/>
+          </div>
+        </div>
+        <div style={{marginTop:20}}>
+          <Bar value={(requiredPassed/requiredChecks.length)*100} color={allRequiredPassed?C.sage:hasFailure?"#c0392b":C.blue} h={8}/>
+        </div>
+      </Card>
+
+      {/* Individual Check Cards */}
+      <div style={{display:"flex",flexDirection:"column",gap:12}}>
+        {checks.map(check=>{
+          const result=results[check.id]||{status:BG_CHECK_STATUS.PENDING};
+          const isPassed=result.status===BG_CHECK_STATUS.PASSED;
+          const isFailed=result.status===BG_CHECK_STATUS.FAILED;
+          return(
+            <Card key={check.id} style={{padding:"20px 24px",borderLeft:`4px solid ${isPassed?C.sage:isFailed?"#c0392b":result.status===BG_CHECK_STATUS.IN_PROGRESS?C.blue:C.bg}`}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:12}}>
+                <div style={{display:"flex",gap:14,alignItems:"flex-start",flex:1}}>
+                  <span style={{fontSize:24,marginTop:2}}>{check.icon}</span>
+                  <div>
+                    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
+                      <p style={{fontFamily:F.serif,fontSize:16,fontWeight:600,margin:0,color:C.dark}}>{check.name}</p>
+                      {check.required&&<span style={{padding:"2px 8px",borderRadius:8,fontSize:9,fontWeight:700,color:"#c0392b",background:"#fdecea",textTransform:"uppercase",letterSpacing:"0.05em"}}>Required</span>}
+                    </div>
+                    <p style={{fontSize:13,color:C.muted,margin:"0 0 6px"}}>{check.desc}</p>
+                    <p style={{fontSize:11,color:C.light,margin:0}}>Provider: {check.provider} · Est. {check.estimatedDays}</p>
+                    {result.details&&<p style={{fontSize:12,color:isPassed?C.sage:isFailed?"#c0392b":C.mid,margin:"8px 0 0",fontStyle:"italic"}}>{result.details}</p>}
+                    {result.completedDate&&<p style={{fontSize:11,color:C.light,margin:"4px 0 0"}}>Completed: {result.completedDate}</p>}
+                  </div>
+                </div>
+                <CheckStatusBadge status={result.status}/>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Strict Policy Notice */}
+      <Card style={{marginTop:24,padding:"20px 24px",background:C.goldBg,border:`1px solid ${C.gold}30`}}>
+        <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+          <span style={{fontSize:20,flexShrink:0}}>{"\u26A0\uFE0F"}</span>
+          <div>
+            <p style={{fontFamily:F.serif,fontSize:14,fontWeight:600,color:C.dark,margin:"0 0 6px"}}>Strict Compliance Policy</p>
+            <p style={{fontSize:13,color:C.mid,lineHeight:1.6,margin:0}}>
+              All required background checks must be completed and passed before any Fellow can be matched with a senior.
+              Results are valid for 12 months and must be renewed annually. Any failed required check will result in
+              immediate suspension of onboarding. Juni maintains a zero-tolerance policy for the safety of our seniors.
+            </p>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function FellowOnboarding({onComplete,onViewPortal}){
+  const [step,setStep]=useState(0);
+  const [anim,setAnim]=useState(true);
+  const [consent,setConsent]=useState({disclosure:false,fcra:false,authorized:false,drugTest:false});
+  const [personalInfo,setPersonalInfo]=useState({legal_name:"",dob:"",ssn_last4:"",address:"",city:"",state:"",zip:""});
+  const [docs,setDocs]=useState({govId:false,proofAddress:false,ssnCard:false});
+  const [refs,setRefs]=useState([{name:"",relationship:"",phone:"",email:""},{name:"",relationship:"",phone:"",email:""},{name:"",relationship:"",phone:"",email:""}]);
+  const [screening,setScreening]=useState({scheduled:false,location:"",date:""});
+  const [bgResults]=useState(mockBgCheckResults);
+
+  useEffect(()=>{setAnim(false);const t=setTimeout(()=>setAnim(true),50);return()=>clearTimeout(t);},[step]);
+
+  const allConsented=consent.disclosure&&consent.fcra&&consent.authorized&&consent.drugTest;
+  const infoComplete=personalInfo.legal_name&&personalInfo.dob&&personalInfo.ssn_last4&&personalInfo.address&&personalInfo.city&&personalInfo.state&&personalInfo.zip;
+  const docsComplete=docs.govId&&docs.proofAddress;
+  const refsComplete=refs.every(r=>r.name&&r.phone&&r.email);
+  const screeningComplete=screening.scheduled;
+
+  const requiredChecks=bgCheckTools.filter(c=>c.required);
+  const requiredPassed=requiredChecks.filter(c=>bgResults[c.id]?.status===BG_CHECK_STATUS.PASSED).length;
+  const allRequiredPassed=requiredPassed===requiredChecks.length;
+
+  const canProceed=[allConsented,infoComplete,docsComplete,refsComplete,screeningComplete,allRequiredPassed];
+
+  const cur=onboardingSteps[step];
+
+  return(
+    <div style={{maxWidth:680,margin:"0 auto",padding:"40px 24px",opacity:anim?1:0,transform:anim?"translateY(0)":"translateY(12px)",transition:"all 0.4s ease"}}>
+      {/* Progress header */}
+      <div style={{marginBottom:36}}>
+        <div style={{display:"flex",gap:4,marginBottom:16}}>
+          {onboardingSteps.map((_,i)=><div key={i} style={{flex:1,height:4,borderRadius:4,background:i<step?C.sage:i===step?C.blue:C.bg,transition:"background 0.4s"}}/>)}
+        </div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
+          <p style={{fontSize:13,color:C.blue,fontWeight:600,letterSpacing:"0.1em",textTransform:"uppercase",margin:0}}>Step {step+1} of {onboardingSteps.length}</p>
+          <p style={{fontSize:12,color:C.light,margin:0}}>Fellow Onboarding</p>
+        </div>
+      </div>
+
+      <h2 style={{fontFamily:F.serif,fontSize:28,fontWeight:600,color:C.dark,margin:"0 0 8px",letterSpacing:"-0.02em"}}>{cur.title}</h2>
+      <p style={{fontSize:15,color:C.mid,margin:"0 0 32px",fontWeight:300,lineHeight:1.6}}>{cur.desc}</p>
+
+      {/* Step 0: Authorization & Consent */}
+      {step===0&&(
+        <div style={{display:"flex",flexDirection:"column",gap:16}}>
+          <Card style={{padding:"24px 28px",background:C.goldBg,border:`1px solid ${C.gold}30`}}>
+            <p style={{fontFamily:F.serif,fontSize:15,fontWeight:600,color:C.dark,margin:"0 0 8px"}}>Important Disclosure</p>
+            <p style={{fontSize:13,color:C.mid,lineHeight:1.7,margin:0}}>
+              Juni requires comprehensive background screening for all Fellows before they can be matched with seniors.
+              This includes criminal records checks, sex offender registry searches, elder abuse registry verification,
+              drug screening, and reference verification. This process is non-negotiable and exists to protect
+              the vulnerable individuals we serve.
+            </p>
+          </Card>
+          {[
+            {k:"disclosure",label:"I acknowledge that Juni will conduct a comprehensive background investigation as a condition of my engagement as a Fellow."},
+            {k:"fcra",label:"I have read and understand the Summary of Rights Under the Fair Credit Reporting Act (FCRA) and authorize Juni to obtain consumer reports for employment purposes."},
+            {k:"authorized",label:"I authorize the release of information from all federal, state, and local agencies, including law enforcement, to verify my suitability as a Fellow."},
+            {k:"drugTest",label:"I consent to pre-employment and random drug testing as a condition of my role, understanding that refusal constitutes automatic disqualification."},
+          ].map(item=>(
+            <Card key={item.k} onClick={()=>setConsent({...consent,[item.k]:!consent[item.k]})} style={{padding:"18px 24px",cursor:"pointer",border:`2px solid ${consent[item.k]?C.sage:C.border}`,background:consent[item.k]?C.sageBg:C.white}}>
+              <div style={{display:"flex",gap:14,alignItems:"flex-start"}}>
+                <div style={{width:22,height:22,borderRadius:6,border:`2px solid ${consent[item.k]?C.sage:C.border}`,background:consent[item.k]?C.sage:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1,transition:"all 0.2s"}}>
+                  {consent[item.k]&&<span style={{color:"white",fontSize:13,fontWeight:700}}>{"\u2713"}</span>}
+                </div>
+                <p style={{fontSize:14,color:C.text,lineHeight:1.6,margin:0}}>{item.label}</p>
+              </div>
+            </Card>
+          ))}
+          {!allConsented&&<p style={{fontSize:12,color:"#c0392b",margin:"8px 0 0",fontWeight:500}}>All four authorizations must be accepted to proceed.</p>}
+        </div>
+      )}
+
+      {/* Step 1: Personal Information */}
+      {step===1&&(
+        <div style={{display:"flex",flexDirection:"column",gap:16}}>
+          {[
+            {k:"legal_name",l:"Legal Full Name",p:"As it appears on government-issued ID",type:"text"},
+            {k:"dob",l:"Date of Birth",p:"",type:"date"},
+            {k:"ssn_last4",l:"Last 4 of SSN",p:"For identity verification only",type:"text"},
+          ].map(f=>(
+            <div key={f.k}>
+              <label style={{fontSize:13,fontWeight:500,color:C.mid,marginBottom:6,display:"block"}}>{f.l}</label>
+              <input type={f.type} placeholder={f.p} value={personalInfo[f.k]} onChange={e=>setPersonalInfo({...personalInfo,[f.k]:e.target.value})} maxLength={f.k==="ssn_last4"?4:undefined}
+                style={{width:"100%",padding:"14px 18px",borderRadius:10,border:`1px solid ${C.border}`,fontFamily:F.sans,fontSize:14,color:C.dark,background:C.white,outline:"none",boxSizing:"border-box"}}/>
+            </div>
+          ))}
+          <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:12}}>
+            <div>
+              <label style={{fontSize:13,fontWeight:500,color:C.mid,marginBottom:6,display:"block"}}>Street Address</label>
+              <input type="text" placeholder="123 Main St, Apt 4" value={personalInfo.address} onChange={e=>setPersonalInfo({...personalInfo,address:e.target.value})}
+                style={{width:"100%",padding:"14px 18px",borderRadius:10,border:`1px solid ${C.border}`,fontFamily:F.sans,fontSize:14,color:C.dark,background:C.white,outline:"none",boxSizing:"border-box"}}/>
+            </div>
+            <div>
+              <label style={{fontSize:13,fontWeight:500,color:C.mid,marginBottom:6,display:"block"}}>City</label>
+              <input type="text" value={personalInfo.city} onChange={e=>setPersonalInfo({...personalInfo,city:e.target.value})}
+                style={{width:"100%",padding:"14px 18px",borderRadius:10,border:`1px solid ${C.border}`,fontFamily:F.sans,fontSize:14,color:C.dark,background:C.white,outline:"none",boxSizing:"border-box"}}/>
+            </div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+            <div>
+              <label style={{fontSize:13,fontWeight:500,color:C.mid,marginBottom:6,display:"block"}}>State</label>
+              <input type="text" placeholder="MI" maxLength={2} value={personalInfo.state} onChange={e=>setPersonalInfo({...personalInfo,state:e.target.value})}
+                style={{width:"100%",padding:"14px 18px",borderRadius:10,border:`1px solid ${C.border}`,fontFamily:F.sans,fontSize:14,color:C.dark,background:C.white,outline:"none",boxSizing:"border-box"}}/>
+            </div>
+            <div>
+              <label style={{fontSize:13,fontWeight:500,color:C.mid,marginBottom:6,display:"block"}}>ZIP Code</label>
+              <input type="text" placeholder="48104" maxLength={5} value={personalInfo.zip} onChange={e=>setPersonalInfo({...personalInfo,zip:e.target.value})}
+                style={{width:"100%",padding:"14px 18px",borderRadius:10,border:`1px solid ${C.border}`,fontFamily:F.sans,fontSize:14,color:C.dark,background:C.white,outline:"none",boxSizing:"border-box"}}/>
+            </div>
+          </div>
+          <Card style={{padding:"16px 20px",background:C.blueBg,border:`1px solid ${C.blue}20`}}>
+            <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+              <span style={{fontSize:14,flexShrink:0}}>{"\uD83D\uDD12"}</span>
+              <p style={{fontSize:12,color:C.mid,margin:0,lineHeight:1.5}}>Your personal information is encrypted end-to-end and only shared with authorized background check providers. Juni never stores full SSN data.</p>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Step 2: Document Upload */}
+      {step===2&&(
+        <div style={{display:"flex",flexDirection:"column",gap:16}}>
+          {[
+            {k:"govId",l:"Government-Issued Photo ID",d:"Driver's license, passport, or state ID",req:true},
+            {k:"proofAddress",l:"Proof of Current Address",d:"Utility bill, bank statement, or lease (within 90 days)",req:true},
+            {k:"ssnCard",l:"Social Security Card",d:"Or W-2/1099 showing full SSN (optional)",req:false},
+          ].map(doc=>(
+            <Card key={doc.k} style={{padding:"24px 28px",border:`2px solid ${docs[doc.k]?C.sage:C.border}`,background:docs[doc.k]?C.sageBg:C.white}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:12}}>
+                <div>
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
+                    <p style={{fontFamily:F.serif,fontSize:16,fontWeight:600,margin:0,color:C.dark}}>{doc.l}</p>
+                    {doc.req&&<span style={{padding:"2px 8px",borderRadius:8,fontSize:9,fontWeight:700,color:"#c0392b",background:"#fdecea",textTransform:"uppercase"}}>Required</span>}
+                  </div>
+                  <p style={{fontSize:13,color:C.muted,margin:0}}>{doc.d}</p>
+                </div>
+                <button onClick={()=>setDocs({...docs,[doc.k]:!docs[doc.k]})} style={{padding:"8px 20px",borderRadius:8,border:docs[doc.k]?"none":`1px solid ${C.border}`,background:docs[doc.k]?C.sage:"transparent",color:docs[doc.k]?"white":C.mid,fontFamily:F.sans,fontSize:13,fontWeight:600,cursor:"pointer"}}>
+                  {docs[doc.k]?"\u2713 Uploaded":"Upload File"}
+                </button>
+              </div>
+            </Card>
+          ))}
+          <Card style={{padding:"16px 20px",background:C.bg}}>
+            <p style={{fontSize:12,color:C.muted,margin:0,lineHeight:1.5}}>Accepted formats: JPG, PNG, PDF. Max file size: 10MB. All documents must be clear, unaltered, and show complete information. Blurred or cropped documents will be rejected.</p>
+          </Card>
+        </div>
+      )}
+
+      {/* Step 3: References */}
+      {step===3&&(
+        <div style={{display:"flex",flexDirection:"column",gap:20}}>
+          <Card style={{padding:"16px 20px",background:C.blueBg,border:`1px solid ${C.blue}20`}}>
+            <p style={{fontSize:13,color:C.mid,margin:0,lineHeight:1.6}}>
+              Provide at least 3 professional references who can speak to your character, reliability, and suitability for working with elderly individuals.
+              References will be contacted via phone and email. <strong>Family members are not accepted as references.</strong>
+            </p>
+          </Card>
+          {refs.map((ref,idx)=>(
+            <Card key={idx} style={{padding:"24px 28px"}}>
+              <p style={{fontFamily:F.serif,fontSize:15,fontWeight:600,color:C.dark,margin:"0 0 16px"}}>Reference {idx+1} {idx<3&&<span style={{fontSize:10,color:"#c0392b",fontWeight:700}}>REQUIRED</span>}</p>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div>
+                  <label style={{fontSize:12,fontWeight:500,color:C.mid,marginBottom:4,display:"block"}}>Full Name</label>
+                  <input type="text" value={ref.name} onChange={e=>{const n=[...refs];n[idx]={...n[idx],name:e.target.value};setRefs(n);}}
+                    style={{width:"100%",padding:"12px 14px",borderRadius:8,border:`1px solid ${C.border}`,fontFamily:F.sans,fontSize:13,color:C.dark,background:C.white,outline:"none",boxSizing:"border-box"}}/>
+                </div>
+                <div>
+                  <label style={{fontSize:12,fontWeight:500,color:C.mid,marginBottom:4,display:"block"}}>Relationship</label>
+                  <input type="text" placeholder="e.g., Former supervisor" value={ref.relationship} onChange={e=>{const n=[...refs];n[idx]={...n[idx],relationship:e.target.value};setRefs(n);}}
+                    style={{width:"100%",padding:"12px 14px",borderRadius:8,border:`1px solid ${C.border}`,fontFamily:F.sans,fontSize:13,color:C.dark,background:C.white,outline:"none",boxSizing:"border-box"}}/>
+                </div>
+                <div>
+                  <label style={{fontSize:12,fontWeight:500,color:C.mid,marginBottom:4,display:"block"}}>Phone</label>
+                  <input type="tel" value={ref.phone} onChange={e=>{const n=[...refs];n[idx]={...n[idx],phone:e.target.value};setRefs(n);}}
+                    style={{width:"100%",padding:"12px 14px",borderRadius:8,border:`1px solid ${C.border}`,fontFamily:F.sans,fontSize:13,color:C.dark,background:C.white,outline:"none",boxSizing:"border-box"}}/>
+                </div>
+                <div>
+                  <label style={{fontSize:12,fontWeight:500,color:C.mid,marginBottom:4,display:"block"}}>Email</label>
+                  <input type="email" value={ref.email} onChange={e=>{const n=[...refs];n[idx]={...n[idx],email:e.target.value};setRefs(n);}}
+                    style={{width:"100%",padding:"12px 14px",borderRadius:8,border:`1px solid ${C.border}`,fontFamily:F.sans,fontSize:13,color:C.dark,background:C.white,outline:"none",boxSizing:"border-box"}}/>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Step 4: Screening Appointment */}
+      {step===4&&(
+        <div style={{display:"flex",flexDirection:"column",gap:16}}>
+          <Card style={{padding:"28px 32px"}}>
+            <h3 style={{fontFamily:F.serif,fontSize:18,fontWeight:600,margin:"0 0 16px"}}>Drug Screening</h3>
+            <p style={{fontSize:14,color:C.mid,lineHeight:1.6,margin:"0 0 20px",fontWeight:300}}>
+              A 10-panel drug screening is required at an authorized Quest Diagnostics location. You must complete your screening within 7 days of scheduling.
+              Failure to appear will result in automatic disqualification.
+            </p>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:20}}>
+              <div>
+                <label style={{fontSize:13,fontWeight:500,color:C.mid,marginBottom:6,display:"block"}}>Preferred Location</label>
+                <select value={screening.location} onChange={e=>setScreening({...screening,location:e.target.value})}
+                  style={{width:"100%",padding:"14px 18px",borderRadius:10,border:`1px solid ${C.border}`,fontFamily:F.sans,fontSize:14,color:C.dark,background:C.white,outline:"none",boxSizing:"border-box"}}>
+                  <option value="">Select a location...</option>
+                  <option value="downtown">Quest Diagnostics - Downtown</option>
+                  <option value="midtown">Quest Diagnostics - Midtown</option>
+                  <option value="suburban">Quest Diagnostics - Suburban East</option>
+                </select>
+              </div>
+              <div>
+                <label style={{fontSize:13,fontWeight:500,color:C.mid,marginBottom:6,display:"block"}}>Preferred Date</label>
+                <input type="date" value={screening.date} onChange={e=>setScreening({...screening,date:e.target.value})}
+                  style={{width:"100%",padding:"14px 18px",borderRadius:10,border:`1px solid ${C.border}`,fontFamily:F.sans,fontSize:14,color:C.dark,background:C.white,outline:"none",boxSizing:"border-box"}}/>
+              </div>
+            </div>
+            {!screening.scheduled?(
+              <button onClick={()=>setScreening({...screening,scheduled:true})} disabled={!screening.location||!screening.date}
+                style={{padding:"12px 28px",borderRadius:10,border:"none",background:screening.location&&screening.date?C.blue:C.bg,color:screening.location&&screening.date?"white":C.muted,fontFamily:F.sans,fontSize:14,fontWeight:600,cursor:screening.location&&screening.date?"pointer":"default"}}>
+                Schedule Appointment
+              </button>
+            ):(
+              <div style={{padding:"14px 20px",background:C.sageBg,borderRadius:10,border:`1px solid ${C.sage}20`,display:"flex",alignItems:"center",gap:10}}>
+                <span style={{color:C.sage,fontSize:16}}>{"\u2713"}</span>
+                <p style={{fontSize:14,color:C.sage,fontWeight:600,margin:0}}>Appointment Scheduled</p>
+              </div>
+            )}
+          </Card>
+
+          <Card style={{padding:"24px 28px",background:C.goldBg,border:`1px solid ${C.gold}30`}}>
+            <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+              <span style={{fontSize:18,flexShrink:0}}>{"\u26A0\uFE0F"}</span>
+              <div>
+                <p style={{fontFamily:F.serif,fontSize:14,fontWeight:600,color:C.dark,margin:"0 0 4px"}}>Testing Requirements</p>
+                <ul style={{margin:0,paddingLeft:18,fontSize:13,color:C.mid,lineHeight:1.7}}>
+                  <li>Bring your government-issued photo ID to the appointment</li>
+                  <li>Arrive 15 minutes early for registration</li>
+                  <li>No-show or refusal to test results in immediate disqualification</li>
+                  <li>Positive results for any controlled substance are disqualifying</li>
+                </ul>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Step 5: Review & Status */}
+      {step===5&&(
+        <BackgroundCheckDashboard checks={bgCheckTools} results={bgResults}/>
+      )}
+
+      {/* Navigation */}
+      <div style={{display:"flex",justifyContent:"space-between",marginTop:40}}>
+        <button onClick={()=>step>0&&setStep(step-1)} style={{padding:"12px 28px",borderRadius:10,border:`1px solid ${C.border}`,background:"transparent",color:C.muted,fontFamily:F.sans,fontSize:14,fontWeight:500,cursor:step>0?"pointer":"default",opacity:step>0?1:0.3}}>Back</button>
+        {step<onboardingSteps.length-1?(
+          <button onClick={()=>canProceed[step]&&setStep(step+1)} style={{padding:"12px 32px",borderRadius:10,border:"none",background:canProceed[step]?C.blue:C.bg,color:canProceed[step]?"white":C.muted,fontFamily:F.sans,fontSize:14,fontWeight:600,cursor:canProceed[step]?"pointer":"default",boxShadow:canProceed[step]?`0 4px 12px ${C.blue}40`:"none",transition:"all 0.2s"}}>
+            Continue
+          </button>
+        ):allRequiredPassed?(
+          <button onClick={onComplete} style={{padding:"12px 32px",borderRadius:10,border:"none",background:C.sage,color:"white",fontFamily:F.sans,fontSize:14,fontWeight:600,cursor:"pointer",boxShadow:`0 4px 12px ${C.sage}40`}}>
+            Complete Onboarding
+          </button>
+        ):(
+          <button disabled style={{padding:"12px 32px",borderRadius:10,border:"none",background:C.bg,color:C.muted,fontFamily:F.sans,fontSize:14,fontWeight:600,cursor:"default"}}>
+            Awaiting Clearance
+          </button>
+        )}
       </div>
     </div>
   );
@@ -888,15 +1319,305 @@ function Landing({onNav}){
 //  MAIN APP SHELL
 // ═══════════════════════════════════════════
 
+// ═══════════════════════════════════════════
+//  CHECKR API — Background Check Service Layer
+// ═══════════════════════════════════════════
+
+const CHECKR_CONFIG = {
+  baseUrl: "https://api.checkr.com/v1",
+  // In production, API key is stored server-side only; client calls go through our backend proxy
+  proxyUrl: "/api/checkr",
+  webhookPath: "/webhooks/checkr",
+};
+
+// Checkr screening package definitions mapped to Juni's requirements
+const CHECKR_PACKAGES = {
+  juni_fellow_standard: {
+    name: "juni_fellow_standard",
+    screenings: [
+      { type: "ssn_trace", subtype: null },
+      { type: "national_criminal_search", subtype: null },
+      { type: "sex_offender_search", subtype: null },
+      { type: "county_criminal_search", subtype: null },
+      { type: "federal_criminal_search", subtype: null },
+      { type: "global_watchlist_search", subtype: null },
+    ],
+  },
+  juni_fellow_enhanced: {
+    name: "juni_fellow_enhanced",
+    screenings: [
+      { type: "ssn_trace", subtype: null },
+      { type: "national_criminal_search", subtype: null },
+      { type: "sex_offender_search", subtype: null },
+      { type: "county_criminal_search", subtype: null },
+      { type: "federal_criminal_search", subtype: null },
+      { type: "global_watchlist_search", subtype: null },
+      { type: "motor_vehicle_report", subtype: null },
+      { type: "education_verification", subtype: null },
+      { type: "personal_reference_verification", subtype: null },
+    ],
+  },
+};
+
+// Checkr report status mapping to Juni internal statuses
+const CHECKR_STATUS_MAP = {
+  pending: BG_CHECK_STATUS.PENDING,
+  running: BG_CHECK_STATUS.IN_PROGRESS,
+  complete: BG_CHECK_STATUS.PASSED,
+  consider: BG_CHECK_STATUS.WAIVER,
+  suspended: BG_CHECK_STATUS.IN_PROGRESS,
+  dispute: BG_CHECK_STATUS.IN_PROGRESS,
+  clear: BG_CHECK_STATUS.PASSED,
+};
+
+// Checkr API service — all calls routed through backend proxy for security
+const CheckrService = {
+  // Step 1: Create a candidate in Checkr
+  async createCandidate({ firstName, lastName, email, phone, dob, ssn, zipcode }) {
+    const res = await fetch(`${CHECKR_CONFIG.proxyUrl}/candidates`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        phone,
+        dob, // format: "1990-01-15"
+        ssn, // full SSN sent securely to Checkr, never stored by Juni
+        zipcode,
+        work_locations: [{ country: "US", state: null, city: null }],
+        custom_id: `juni_fellow_${Date.now()}`,
+      }),
+    });
+    if (!res.ok) throw new Error(`Checkr candidate creation failed: ${res.status}`);
+    return res.json(); // returns { id, object: "candidate", ... }
+  },
+
+  // Step 2: Create an invitation (Checkr-hosted onboarding flow for consent/disclosure)
+  async createInvitation(candidateId, packageName) {
+    const res = await fetch(`${CHECKR_CONFIG.proxyUrl}/invitations`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        candidate_id: candidateId,
+        package: packageName || CHECKR_PACKAGES.juni_fellow_standard.name,
+        // Checkr handles FCRA disclosure, authorization, and e-signature
+        communication_types: ["email", "sms"],
+      }),
+    });
+    if (!res.ok) throw new Error(`Checkr invitation creation failed: ${res.status}`);
+    return res.json(); // returns { id, invitation_url, status, ... }
+  },
+
+  // Step 3: Directly create a report (when consent is collected by Juni, not Checkr-hosted)
+  async createReport(candidateId, packageName) {
+    const res = await fetch(`${CHECKR_CONFIG.proxyUrl}/reports`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        candidate_id: candidateId,
+        package: packageName || CHECKR_PACKAGES.juni_fellow_standard.name,
+      }),
+    });
+    if (!res.ok) throw new Error(`Checkr report creation failed: ${res.status}`);
+    return res.json(); // returns { id, status, screenings: [...], ... }
+  },
+
+  // Step 4: Retrieve a report with all screening results
+  async getReport(reportId) {
+    const res = await fetch(`${CHECKR_CONFIG.proxyUrl}/reports/${reportId}`);
+    if (!res.ok) throw new Error(`Checkr report fetch failed: ${res.status}`);
+    return res.json();
+  },
+
+  // Step 5: Retrieve individual screening details
+  async getScreening(screeningId) {
+    const res = await fetch(`${CHECKR_CONFIG.proxyUrl}/screenings/${screeningId}`);
+    if (!res.ok) throw new Error(`Checkr screening fetch failed: ${res.status}`);
+    return res.json();
+  },
+
+  // Step 6: List all reports for a candidate
+  async listCandidateReports(candidateId) {
+    const res = await fetch(`${CHECKR_CONFIG.proxyUrl}/candidates/${candidateId}/reports`);
+    if (!res.ok) throw new Error(`Checkr candidate reports fetch failed: ${res.status}`);
+    return res.json();
+  },
+
+  // Map Checkr report to Juni's background check tool statuses
+  mapReportToJuniStatus(checkrReport) {
+    const results = {};
+    if (!checkrReport || !checkrReport.screenings) return results;
+
+    const screeningMap = {
+      ssn_trace: "identity",
+      national_criminal_search: "criminal",
+      sex_offender_search: "sex_offender",
+      county_criminal_search: "criminal", // merges with national
+      federal_criminal_search: "criminal", // merges with national
+      motor_vehicle_report: "driving",
+      education_verification: "education",
+      personal_reference_verification: "references",
+      global_watchlist_search: "elder_abuse", // closest match for watchlist
+    };
+
+    for (const screening of checkrReport.screenings) {
+      const juniKey = screeningMap[screening.type];
+      if (!juniKey) continue;
+
+      const mappedStatus = CHECKR_STATUS_MAP[screening.status] || BG_CHECK_STATUS.PENDING;
+
+      // If the Juni key already exists, use the worse status (most conservative)
+      if (results[juniKey]) {
+        const priority = [BG_CHECK_STATUS.FAILED, BG_CHECK_STATUS.WAIVER, BG_CHECK_STATUS.IN_PROGRESS, BG_CHECK_STATUS.PENDING, BG_CHECK_STATUS.PASSED];
+        const existingPriority = priority.indexOf(results[juniKey].status);
+        const newPriority = priority.indexOf(mappedStatus);
+        if (newPriority < existingPriority) {
+          results[juniKey] = { status: mappedStatus, completedDate: screening.completed_at, details: `Checkr ${screening.type}: ${screening.status}` };
+        }
+      } else {
+        results[juniKey] = { status: mappedStatus, completedDate: screening.completed_at, details: `Checkr ${screening.type}: ${screening.status}` };
+      }
+    }
+
+    // Overall report adjudication
+    if (checkrReport.adjudication === "adverse") {
+      // If adversely adjudicated, mark all as failed
+      for (const key of Object.keys(results)) {
+        if (results[key].status !== BG_CHECK_STATUS.PASSED) {
+          results[key].status = BG_CHECK_STATUS.FAILED;
+        }
+      }
+    }
+
+    return results;
+  },
+
+  // Process incoming Checkr webhook event
+  processWebhookEvent(event) {
+    // Webhook event types from Checkr:
+    // report.created, report.upgraded, report.completed, report.suspended,
+    // report.resumed, report.pre_adverse_action, report.post_adverse_action,
+    // invitation.created, invitation.completed, invitation.expired
+    const { type: eventType, data } = event;
+
+    switch (eventType) {
+      case "report.completed":
+        return { action: "update_status", reportId: data.object.id, status: data.object.status, adjudication: data.object.adjudication };
+      case "report.suspended":
+        return { action: "flag_review", reportId: data.object.id, reason: "Report suspended - manual review required" };
+      case "report.pre_adverse_action":
+        return { action: "adverse_notice", reportId: data.object.id, reason: "Pre-adverse action initiated" };
+      case "invitation.completed":
+        return { action: "invitation_done", candidateId: data.object.candidate_id, invitationId: data.object.id };
+      case "invitation.expired":
+        return { action: "invitation_expired", candidateId: data.object.candidate_id };
+      default:
+        return { action: "log", eventType, data };
+    }
+  },
+};
+
+// ═══════════════════════════════════════════
+//  CHECKR-INTEGRATED FELLOW ONBOARDING HOOK
+// ═══════════════════════════════════════════
+
+function useCheckrOnboarding() {
+  const [candidateId, setCandidateId] = useState(null);
+  const [reportId, setReportId] = useState(null);
+  const [invitationUrl, setInvitationUrl] = useState(null);
+  const [checkrStatus, setCheckrStatus] = useState("idle"); // idle | creating | invited | running | complete | error
+  const [checkrResults, setCheckrResults] = useState(null);
+  const [error, setError] = useState(null);
+
+  const initiateBackgroundCheck = useCallback(async (fellowInfo) => {
+    setCheckrStatus("creating");
+    setError(null);
+    try {
+      // Create candidate in Checkr
+      const candidate = await CheckrService.createCandidate({
+        firstName: fellowInfo.firstName,
+        lastName: fellowInfo.lastName,
+        email: fellowInfo.email,
+        phone: fellowInfo.phone,
+        dob: fellowInfo.dob,
+        ssn: fellowInfo.ssn,
+        zipcode: fellowInfo.zipcode,
+      });
+      setCandidateId(candidate.id);
+
+      // Create invitation for Checkr-hosted consent flow
+      const invitation = await CheckrService.createInvitation(
+        candidate.id,
+        CHECKR_PACKAGES.juni_fellow_enhanced.name
+      );
+      setInvitationUrl(invitation.invitation_url);
+      setCheckrStatus("invited");
+
+      return { candidateId: candidate.id, invitationUrl: invitation.invitation_url };
+    } catch (err) {
+      setError(err.message);
+      setCheckrStatus("error");
+      throw err;
+    }
+  }, []);
+
+  const createDirectReport = useCallback(async () => {
+    if (!candidateId) throw new Error("No candidate ID available");
+    setCheckrStatus("running");
+    setError(null);
+    try {
+      const report = await CheckrService.createReport(
+        candidateId,
+        CHECKR_PACKAGES.juni_fellow_enhanced.name
+      );
+      setReportId(report.id);
+      return report;
+    } catch (err) {
+      setError(err.message);
+      setCheckrStatus("error");
+      throw err;
+    }
+  }, [candidateId]);
+
+  const pollReportStatus = useCallback(async () => {
+    if (!reportId) return null;
+    try {
+      const report = await CheckrService.getReport(reportId);
+      const mappedResults = CheckrService.mapReportToJuniStatus(report);
+      setCheckrResults(mappedResults);
+
+      if (report.status === "complete") {
+        setCheckrStatus("complete");
+      }
+      return { report, mappedResults };
+    } catch (err) {
+      setError(err.message);
+      return null;
+    }
+  }, [reportId]);
+
+  return {
+    candidateId, reportId, invitationUrl,
+    checkrStatus, checkrResults, error,
+    initiateBackgroundCheck, createDirectReport, pollReportStatus,
+  };
+}
+
+// ═══════════════════════════════════════════
+//  MAIN APP SHELL
+// ═══════════════════════════════════════════
+
 export default function JuniPlatform(){
   const [page,setPage]=useState("landing");
   const [fadeIn,setFadeIn]=useState(false);
+  const [fellowOnboarded,setFellowOnboarded]=useState(false);
 
   useEffect(()=>{setFadeIn(true);},[]);
   useEffect(()=>{setFadeIn(false);const t=setTimeout(()=>setFadeIn(true),50);return()=>clearTimeout(t);},[page]);
 
-  const portalLabel = {family:"Family Portal",fellow:"Fellow Portal",partner:"Trust Partner Portal",landing:"",vibecheck:"",pricing:""}[page]||"";
-  const portalColor = {family:C.sage,fellow:C.blue,partner:C.amber}[page]||C.sage;
+  const portalLabel = {family:"Family Portal",fellow:"Fellow Portal",partner:"Trust Partner Portal",landing:"",vibecheck:"",pricing:"",fellow_onboarding:"Fellow Onboarding",fellow_bgcheck:"Background Checks"}[page]||"";
+  const portalColor = {family:C.sage,fellow:C.blue,partner:C.amber,fellow_onboarding:C.blue,fellow_bgcheck:C.blue}[page]||C.sage;
 
   return(
     <div style={{minHeight:"100vh",background:C.cream,fontFamily:F.sans,opacity:fadeIn?1:0,transition:"opacity 0.5s ease"}}>
@@ -915,9 +1636,12 @@ export default function JuniPlatform(){
             {["landing","family","fellow","partner"].map(p=>{
               const labels={landing:"Home",family:"Family",fellow:"Fellow",partner:"Partner"};
               const colors={landing:C.sage,family:C.sage,fellow:C.blue,partner:C.amber};
-              const active=page===p||(p==="landing"&&["landing","vibecheck","pricing"].includes(page));
+              const active=page===p||(p==="landing"&&["landing","vibecheck","pricing"].includes(page))||(p==="fellow"&&["fellow","fellow_onboarding","fellow_bgcheck"].includes(page));
               return(
-                <button key={p} onClick={()=>setPage(p==="landing"?"landing":p)} style={{
+                <button key={p} onClick={()=>{
+                  if(p==="fellow"&&!fellowOnboarded){setPage("fellow_onboarding");return;}
+                  setPage(p==="landing"?"landing":p);
+                }} style={{
                   padding:"7px 14px",borderRadius:8,border:"none",cursor:"pointer",
                   fontSize:12,fontWeight:active?600:400,fontFamily:F.sans,
                   background:active?`${colors[p]}12`:"transparent",
@@ -930,7 +1654,7 @@ export default function JuniPlatform(){
           <div style={{display:"flex",alignItems:"center",gap:12}}>
             {portalLabel&&<span style={{fontSize:12,color:portalColor,fontWeight:500}}>{portalLabel}</span>}
             <div style={{width:34,height:34,borderRadius:"50%",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:600,color:C.brown,cursor:"pointer"}}>
-              {page==="fellow"?"SC":page==="partner"?"MW":"LR"}
+              {["fellow","fellow_onboarding","fellow_bgcheck"].includes(page)?(fellowOnboarded?"SC":"JR"):page==="partner"?"MW":"LR"}
             </div>
           </div>
         </div>
@@ -941,7 +1665,13 @@ export default function JuniPlatform(){
       {page==="vibecheck"&&<VibeCheck onDone={()=>setPage("family")}/>}
       {page==="pricing"&&<Landing onNav={setPage}/>}
       {page==="family"&&<FamilyPortal/>}
-      {page==="fellow"&&<FellowPortal/>}
+      {page==="fellow_onboarding"&&<FellowOnboarding onComplete={()=>{setFellowOnboarded(true);setPage("fellow");}} onViewPortal={()=>setPage("fellow")}/>}
+      {page==="fellow_bgcheck"&&<BackgroundCheckDashboard checks={bgCheckTools} results={mockBgCheckResults} onBack={()=>setPage("fellow_onboarding")}/>}
+      {page==="fellow"&&(
+        fellowOnboarded
+          ? <FellowPortal/>
+          : <FellowOnboarding onComplete={()=>{setFellowOnboarded(true);setPage("fellow");}} onViewPortal={()=>setPage("fellow")}/>
+      )}
       {page==="partner"&&<PartnerPortal/>}
 
       {/* Footer */}
