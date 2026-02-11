@@ -11,26 +11,81 @@ export const BG_CHECK_STATUS = {
   WAIVER: "Waiver Required",
 };
 
-// ── Background Check Tool Definitions ──
+// ── Background Check Tool Definitions (Multi-Layer Verification) ──
+// Goes beyond industry standard: 1,300+ databases, manual human review,
+// TSA-grade identity verification, continuous post-approval monitoring.
 export const bgCheckTools = [
-  { id: "identity", name: "Identity Verification", desc: "Government-issued ID validation and address history", provider: "Checkr Verified", required: true, estimatedDays: "1-2 days" },
-  { id: "criminal", name: "Criminal Background Check", desc: "Federal, state, and county criminal records search", provider: "Checkr National", required: true, estimatedDays: "3-5 days" },
-  { id: "sex_offender", name: "Sex Offender Registry", desc: "National Sex Offender Public Website (NSOPW) search", provider: "NSOPW Direct", required: true, estimatedDays: "1-2 days" },
-  { id: "elder_abuse", name: "Elder Abuse Registry", desc: "State elder abuse and neglect registry check", provider: "State Registry API", required: true, estimatedDays: "3-7 days" },
-  { id: "driving", name: "Motor Vehicle Records", desc: "Driving record check for transportation-eligible Fellows", provider: "DMV Connect", required: false, estimatedDays: "1-3 days" },
-  { id: "references", name: "Professional References", desc: "Minimum 3 professional references verified via phone/email", provider: "Internal Review", required: true, estimatedDays: "5-7 days" },
-  { id: "education", name: "Education Verification", desc: "Degree and certification validation", provider: "National Student Clearinghouse", required: false, estimatedDays: "2-4 days" },
-  { id: "drug_screen", name: "Drug Screening", desc: "10-panel drug test at authorized lab", provider: "Quest Diagnostics", required: true, estimatedDays: "2-3 days" },
+  { id: "identity", name: "Identity Verification", desc: "TSA-grade ID validation: driver's license matched against live selfie, SSN trace, and address history across 1,300+ databases", provider: "Checkr Verified + IDScan.net", required: true, estimatedDays: "1-2 days", category: "identity" },
+  { id: "criminal", name: "Criminal Background Check", desc: "Federal, state, and county criminal records search with manual human review of non-digitized courthouse records", provider: "Checkr National + Manual Review", required: true, estimatedDays: "3-5 days", category: "criminal" },
+  { id: "sex_offender", name: "Sex Offender Registry", desc: "National Sex Offender Public Website (NSOPW) comprehensive search across all 50 states and territories", provider: "NSOPW Direct", required: true, estimatedDays: "1-2 days", category: "criminal" },
+  { id: "elder_abuse", name: "Elder Abuse Registry", desc: "State elder abuse, neglect, and exploitation registry check — critical for senior safety", provider: "State Registry API", required: true, estimatedDays: "3-7 days", category: "criminal" },
+  { id: "watchlist", name: "Global Watchlist", desc: "OIG exclusion list, global sanctions, and terrorism watchlist screening per CMS requirements", provider: "Checkr Global", required: true, estimatedDays: "1-2 days", category: "criminal" },
+  { id: "driving", name: "Motor Vehicle Records", desc: "Complete driving record check for transportation-eligible Fellows, including violation history", provider: "DMV Connect", required: false, estimatedDays: "1-3 days", category: "records" },
+  { id: "references", name: "Professional References", desc: "Minimum 3 professional references verified via phone and email — family members excluded", provider: "Internal Review Team", required: true, estimatedDays: "5-7 days", category: "verification" },
+  { id: "education", name: "Education & Certification", desc: "Degree, certification, and relevant training validation through National Student Clearinghouse", provider: "National Student Clearinghouse", required: false, estimatedDays: "2-4 days", category: "verification" },
+  { id: "drug_screen", name: "Drug Screening", desc: "10-panel drug test at authorized Quest Diagnostics lab, including opioids and synthetic drugs", provider: "Quest Diagnostics", required: true, estimatedDays: "2-3 days", category: "health" },
 ];
 
-// ── Onboarding Step Definitions ──
+// ── Onboarding Step Definitions (8-Step Enhanced Flow) ──
 export const onboardingSteps = [
-  { id: "consent", title: "Authorization & Consent", desc: "Review and sign background check authorization" },
-  { id: "identity_info", title: "Personal Information", desc: "Verify your identity and provide required details" },
-  { id: "documents", title: "Document Upload", desc: "Upload government-issued ID and supporting documents" },
-  { id: "references_input", title: "Reference Submission", desc: "Provide professional and personal references" },
-  { id: "screening", title: "Screening Appointment", desc: "Schedule drug screening and any required in-person checks" },
-  { id: "review", title: "Review & Status", desc: "Track the progress of all background checks" },
+  { id: "consent", title: "Authorization & Consent", desc: "Review disclosures and authorize comprehensive background screening", icon: "shield" },
+  { id: "identity_verify", title: "Identity Verification", desc: "TSA-grade identity confirmation with photo ID and live verification", icon: "scan" },
+  { id: "identity_info", title: "Personal Information", desc: "Provide identity details for federal, state, and county records search", icon: "user" },
+  { id: "documents", title: "Document Upload", desc: "Upload government-issued ID, proof of address, and certifications", icon: "upload" },
+  { id: "references_input", title: "Reference Submission", desc: "Provide at least 3 professional references for verification", icon: "users" },
+  { id: "screening", title: "Drug Screening", desc: "Schedule 10-panel drug screening at an authorized lab", icon: "flask" },
+  { id: "training", title: "Safety Training", desc: "Complete mandatory orientation and compliance modules", icon: "graduation" },
+  { id: "review", title: "Background Check Status", desc: "Real-time tracking of all screening results via Checkr", icon: "check-circle" },
+];
+
+// ── Safety Framework (Prevent · Support · Act) ──
+export const safetyFramework = {
+  prevent: {
+    title: "Prevent",
+    desc: "Pre-visit vetting",
+    items: [
+      "TSA-grade identity verification",
+      "Multi-layer background checks across 1,300+ databases",
+      "Manual human review of non-digitized records",
+      "Elder abuse & sex offender registry screening",
+      "10-panel drug testing at certified labs",
+      "3+ professional reference verification",
+      "Mandatory safety & compliance training",
+    ],
+  },
+  support: {
+    title: "Support",
+    desc: "During-visit safety",
+    items: [
+      "Digital Fellow ID badge verified by families",
+      "Masked phone numbers protect personal info",
+      "GPS-verified visit check-in and check-out",
+      "Real-time visit monitoring dashboard",
+      "One-tap emergency support button",
+      "Visit notes reviewed by AI for safety signals",
+    ],
+  },
+  act: {
+    title: "Act",
+    desc: "Post-incident response",
+    items: [
+      "Immediate Fellow suspension upon any safety concern",
+      "Dedicated Trust & Safety investigation team",
+      "Annual full background re-screening",
+      "Continuous criminal record monitoring",
+      "Monthly OIG exclusion list screening",
+      "Zero-tolerance policy — no exceptions",
+    ],
+  },
+};
+
+// ── Continuous Monitoring (Post-Approval) ──
+export const continuousMonitoring = [
+  { name: "Annual Full Re-Check", desc: "Complete background check repeated every 12 months for all active Fellows", frequency: "Annually" },
+  { name: "Continuous Criminal Monitoring", desc: "Real-time alerts triggered by any new criminal records across all jurisdictions", frequency: "Continuous" },
+  { name: "Motor Vehicle Monitoring", desc: "Any driving flag triggers an immediate full MVR re-screen", frequency: "Continuous" },
+  { name: "OIG Exclusion Screening", desc: "Monthly check against the OIG List of Excluded Individuals/Entities", frequency: "Monthly" },
+  { name: "Reference Re-Verification", desc: "Annual re-contact of professional references to confirm ongoing suitability", frequency: "Annually" },
 ];
 
 // ── Mock Data: Seniors ──
@@ -118,12 +173,13 @@ export const pClients = [
 
 // ── Mock Background Check Results ──
 export const mockBgCheckResults = {
-  identity: { status: BG_CHECK_STATUS.PASSED, completedDate: "Feb 1, 2026", details: "Identity confirmed via state-issued driver's license." },
-  criminal: { status: BG_CHECK_STATUS.PASSED, completedDate: "Feb 4, 2026", details: "No records found across federal, state, and county databases." },
-  sex_offender: { status: BG_CHECK_STATUS.PASSED, completedDate: "Feb 1, 2026", details: "No matches found in NSOPW database." },
-  elder_abuse: { status: BG_CHECK_STATUS.IN_PROGRESS, completedDate: null, details: "Awaiting response from state registry. Estimated completion: Feb 10." },
+  identity: { status: BG_CHECK_STATUS.PASSED, completedDate: "Feb 1, 2026", details: "TSA-grade identity confirmed: driver's license matched to live selfie, SSN trace verified across 1,300+ databases." },
+  criminal: { status: BG_CHECK_STATUS.PASSED, completedDate: "Feb 4, 2026", details: "No records found across federal, state, and county databases. Manual courthouse review completed for non-digitized jurisdictions." },
+  sex_offender: { status: BG_CHECK_STATUS.PASSED, completedDate: "Feb 1, 2026", details: "No matches found in NSOPW database across all 50 states and territories." },
+  elder_abuse: { status: BG_CHECK_STATUS.IN_PROGRESS, completedDate: null, details: "Awaiting response from state elder abuse and neglect registry. Estimated completion: Feb 10." },
+  watchlist: { status: BG_CHECK_STATUS.PASSED, completedDate: "Feb 1, 2026", details: "Cleared against OIG exclusion list, global sanctions, and terrorism watchlist databases." },
   driving: { status: BG_CHECK_STATUS.PENDING, completedDate: null, details: "Not yet initiated. Optional for non-transport Fellows." },
-  references: { status: BG_CHECK_STATUS.IN_PROGRESS, completedDate: null, details: "2 of 3 references verified. Awaiting response from third contact." },
+  references: { status: BG_CHECK_STATUS.IN_PROGRESS, completedDate: null, details: "2 of 3 professional references verified via phone and email. Awaiting response from third contact." },
   education: { status: BG_CHECK_STATUS.PASSED, completedDate: "Feb 3, 2026", details: "B.S. in Social Work confirmed, University of Michigan, 2022." },
-  drug_screen: { status: BG_CHECK_STATUS.PASSED, completedDate: "Feb 2, 2026", details: "10-panel screen completed. All results negative." },
+  drug_screen: { status: BG_CHECK_STATUS.PASSED, completedDate: "Feb 2, 2026", details: "10-panel screen completed at Quest Diagnostics. All results negative." },
 };
