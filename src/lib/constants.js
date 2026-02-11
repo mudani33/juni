@@ -171,6 +171,152 @@ export const pClients = [
   { id: 5, family: "Kim", senior: "Soon-Yi", status: "Onboarding", eng: 0, mo: 0, plan: "Premium" },
 ];
 
+// ── Mock Data: Employer B2B ──
+export const employerProfile = {
+  company: "Meridian Health Systems",
+  industry: "Healthcare",
+  employees: 4200,
+  enrolled: 186,
+  since: "September 2025",
+  plan: "Enterprise",
+  admin: "Rebecca Torres",
+  adminTitle: "VP, People & Culture",
+};
+
+export const employerStats = {
+  enrolled: 186,
+  activeParents: 142,
+  utilization: 76,
+  avgSatisfaction: 4.9,
+  monthlyEnrollment: [28, 42, 58, 74, 92, 108, 122, 134, 148, 156, 172, 186],
+};
+
+export const employerROI = {
+  caregiverPct: 34,
+  avgBurdenBefore: 7.2,
+  avgBurdenAfter: 3.8,
+  burdenReduction: 47,
+  absenteeismBefore: 8.2,
+  absenteeismAfter: 4.1,
+  absenteeismReduction: 50,
+  turnoverBefore: 18,
+  turnoverAfter: 9.4,
+  turnoverReduction: 48,
+  productivityGain: 22.5,
+  annualSavings: 1240000,
+  roiMultiple: 4.2,
+  monthlyBurden: [7.2, 6.9, 6.5, 6.1, 5.6, 5.2, 4.8, 4.5, 4.2, 4.0, 3.9, 3.8],
+  monthlyAbsenteeism: [8.2, 7.8, 7.2, 6.8, 6.2, 5.7, 5.3, 4.9, 4.6, 4.4, 4.2, 4.1],
+  monthlyTurnover: [18.0, 17.2, 16.1, 15.0, 14.2, 13.1, 12.0, 11.2, 10.4, 10.0, 9.6, 9.4],
+};
+
+export const caregiverBurdenIndex = {
+  dimensions: [
+    { name: "Time & Schedule Disruption", before: 8.1, after: 4.2, weight: 0.25 },
+    { name: "Emotional Stress", before: 7.8, after: 4.5, weight: 0.2 },
+    { name: "Financial Strain", before: 6.9, after: 3.8, weight: 0.2 },
+    { name: "Work Productivity Impact", before: 7.4, after: 3.2, weight: 0.2 },
+    { name: "Physical Health Effects", before: 5.8, after: 3.1, weight: 0.15 },
+  ],
+  scale: "1-10 (10 = highest burden)",
+  methodology: "Validated Zarit Burden Interview (ZBI-12) adapted for workplace context",
+};
+
+export const employerClinicalOutcomes = {
+  engagement: { current: 87, trend: "+12%", desc: "Average senior engagement score across all enrolled parents" },
+  memory: { current: 68, trend: "+8%", desc: "Memory recall stability over 6+ month enrollment period" },
+  mood: { current: 82, trend: "+15%", desc: "Sustained mood improvement measured per-visit" },
+  isolation: { current: 71, trend: "-34%", desc: "Reduction in social isolation indicators" },
+  hospitalization: { current: 28, trend: "-28%", desc: "Reduction in unnecessary ER visits and hospitalizations" },
+};
+
+export const employerDepartments = [
+  { name: "Engineering", employees: 820, enrolled: 48, utilization: 82, satisfaction: 4.9, burden: 3.4 },
+  { name: "Sales & Marketing", employees: 640, enrolled: 32, utilization: 74, satisfaction: 4.8, burden: 4.1 },
+  { name: "Operations", employees: 580, enrolled: 28, utilization: 71, satisfaction: 4.7, burden: 4.4 },
+  { name: "Finance & Legal", employees: 420, enrolled: 22, utilization: 78, satisfaction: 4.9, burden: 3.6 },
+  { name: "Human Resources", employees: 180, enrolled: 14, utilization: 86, satisfaction: 5.0, burden: 3.2 },
+  { name: "Clinical Staff", employees: 960, enrolled: 31, utilization: 68, satisfaction: 4.8, burden: 4.8 },
+  { name: "Administration", employees: 600, enrolled: 11, utilization: 64, satisfaction: 4.7, burden: 5.1 },
+];
+
+export const employerEmployees = [
+  { id: 1, name: "Amanda Chen", dept: "Engineering", parent: "Ruth Chen", age: 81, status: "Active", enrolled: "Sep 2025", kindred: 96, fellow: "Sarah Chen", visits: 24, mood: "Joyful", legacy: 8 },
+  { id: 2, name: "Marcus Williams", dept: "Sales & Marketing", parent: "Dorothy Williams", age: 76, status: "Active", enrolled: "Oct 2025", kindred: 91, fellow: "James Kim", visits: 18, mood: "Calm", legacy: 5 },
+  { id: 3, name: "Dr. Priya Patel", dept: "Clinical Staff", parent: "Rajesh Patel", age: 84, status: "Active", enrolled: "Sep 2025", kindred: 88, fellow: "Maya Rodriguez", visits: 22, mood: "Reflective", legacy: 12 },
+  { id: 4, name: "David Thompson", dept: "Finance & Legal", parent: "Margaret Thompson", age: 79, status: "Active", enrolled: "Nov 2025", kindred: 93, fellow: "Sarah Chen", visits: 14, mood: "Warm", legacy: 6 },
+  { id: 5, name: "Lisa Rodriguez", dept: "Operations", parent: "Carmen Rodriguez", age: 88, status: "Active", enrolled: "Oct 2025", kindred: 85, fellow: "Aisha Johnson", visits: 20, mood: "Nostalgic", legacy: 9 },
+  { id: 6, name: "Robert Kim", dept: "Engineering", parent: "Soon-Yi Kim", age: 82, status: "Onboarding", enrolled: "Feb 2026", kindred: 0, fellow: "Pending", visits: 0, mood: "\u2014", legacy: 0 },
+];
+
+export const employerPlans = [
+  {
+    name: "Starter",
+    pepm: "$8",
+    desc: "For companies beginning their caregiver support journey",
+    features: [
+      "Up to 8 hours/month per parent",
+      "Standard Fellow matching",
+      "Monthly utilization report",
+      "Employee self-service onboarding",
+      "Basic caregiver burden assessment",
+    ],
+    excluded: ["Clinical outcomes dashboard", "HRIS integration", "Dedicated CSM"],
+    employees: "50-500",
+  },
+  {
+    name: "Growth",
+    pepm: "$14",
+    popular: true,
+    desc: "Most popular for mid-market employers serious about retention",
+    features: [
+      "Up to 16 hours/month per parent",
+      "Priority Kindred matching",
+      "Weekly analytics dashboard",
+      "Full Caregiver Burden Index",
+      "Clinical outcomes tracking",
+      "ROI calculator & reports",
+      "Legacy Vault for all families",
+    ],
+    excluded: ["HRIS integration", "Custom SLA"],
+    employees: "500-5,000",
+  },
+  {
+    name: "Enterprise",
+    pepm: "Custom",
+    desc: "White-glove support for large organizations with complex needs",
+    features: [
+      "Unlimited hours per parent",
+      "Concierge Fellow matching",
+      "Real-time analytics & predictive alerts",
+      "Full Caregiver Burden Index + benchmarking",
+      "Clinical outcomes + hospitalization tracking",
+      "ROI dashboard with board-ready reports",
+      "Full Legacy Vault + family portal access",
+      "HRIS integration (Workday, BambooHR, ADP)",
+      "Dedicated Customer Success Manager",
+      "Custom SLA & compliance reporting",
+    ],
+    excluded: [],
+    employees: "5,000+",
+  },
+];
+
+export const employerB2BDifferentiators = [
+  { title: "Anti-Gig Model", desc: "Dedicated Fellows build real relationships with your employees' parents \u2014 no rotating strangers.", stat: "94%", statLabel: "Avg Kindred Match" },
+  { title: "Clinical-Grade Outcomes", desc: "Track engagement, memory recall, and mood with clinical rigor \u2014 not just satisfaction surveys.", stat: "87%", statLabel: "Engagement Score" },
+  { title: "Caregiver Burden Index", desc: "Proprietary workplace-adapted ZBI that measures and reduces the hidden cost of caregiving.", stat: "47%", statLabel: "Burden Reduction" },
+  { title: "Legacy Vault", desc: "Every visit creates a digital heirloom \u2014 stories, voice recordings, and life lessons preserved forever.", stat: "1,200+", statLabel: "Stories Captured" },
+  { title: "ROI Dashboard", desc: "Real-time financial impact: reduced absenteeism, lower turnover, productivity gains \u2014 board-ready.", stat: "4.2x", statLabel: "Avg ROI" },
+  { title: "Industry-Leading Safety", desc: "1,300+ database screening, TSA-grade verification, continuous monitoring. Zero tolerance.", stat: "9", statLabel: "Screening Layers" },
+];
+
+export const employerTestimonials = [
+  { name: "Sarah Mitchell", title: "CHRO, Apex Financial Group", quote: "Juni reduced caregiver-related turnover by 52% in our first year. The ROI dashboard made it easy to justify to our board.", employees: "3,200" },
+  { name: "Dr. James Park", title: "VP People, Cascade Health", quote: "The clinical outcomes data is unlike anything we\u2019ve seen. We can actually measure the impact on our employees\u2019 parents' wellbeing.", employees: "8,400" },
+  { name: "Maria Gonzalez", title: "Benefits Director, TechForward", quote: "Our employees cry when they see the Legacy Vault recordings. It\u2019s the most meaningful benefit we\u2019ve ever offered.", employees: "1,800" },
+];
+
 // ── Mock Background Check Results ──
 export const mockBgCheckResults = {
   identity: { status: BG_CHECK_STATUS.PASSED, completedDate: "Feb 1, 2026", details: "TSA-grade identity confirmed: driver's license matched to live selfie, SSN trace verified across 1,300+ databases." },

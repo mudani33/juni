@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Users, Heart, Handshake, Menu, X } from "lucide-react";
+import { Home, Users, Heart, Handshake, Building2, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "../../lib/utils";
 import Avatar from "../ui/Avatar";
@@ -9,6 +9,7 @@ const navItems = [
   { path: "/family", label: "Family", icon: Heart, color: "text-sage" },
   { path: "/fellow", label: "Fellow", icon: Users, color: "text-blue" },
   { path: "/partner", label: "Partner", icon: Handshake, color: "text-amber" },
+  { path: "/employer", label: "Employer", icon: Building2, color: "text-purple" },
 ];
 
 export default function Header() {
@@ -21,11 +22,13 @@ export default function Header() {
     "/fellow": { label: "Fellow Portal", color: "text-blue" },
     "/fellow/onboarding": { label: "Fellow Onboarding", color: "text-blue" },
     "/partner": { label: "Trust Partner Portal", color: "text-amber" },
+    "/employer": { label: "Employer Portal", color: "text-purple" },
   };
 
   const currentMeta = Object.entries(portalMeta).find(([k]) => location.pathname.startsWith(k));
   const avatarInitials = location.pathname.startsWith("/fellow") ? "SC"
-    : location.pathname.startsWith("/partner") ? "MW" : "LR";
+    : location.pathname.startsWith("/partner") ? "MW"
+    : location.pathname.startsWith("/employer") ? "RT" : "LR";
 
   return (
     <header className="bg-warm-white border-b border-border sticky top-0 z-50 backdrop-blur-sm bg-warm-white/95">
