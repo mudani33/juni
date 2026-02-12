@@ -13,16 +13,16 @@ const fadeUp = {
 };
 
 const pillars = [
-  { icon: Heart, color: "text-sage", bg: "bg-sage-bg", title: "Anti-Gig Economy", desc: "No rotating strangers. A dedicated Fellow who becomes part of the family\u2019s trust circle." },
-  { icon: BarChart3, color: "text-blue", bg: "bg-blue-bg", title: "Social Health Tracking", desc: "Engagement, memory recall, and mood tracked with clinical rigor and beautiful visualizations." },
-  { icon: BookOpen, color: "text-gold", bg: "bg-gold-bg", title: "Legacy-First", desc: "Every visit creates a digital heirloom \u2014 memoirs, voice recordings, life lessons preserved forever." },
+  { icon: Heart, color: "text-sage", bg: "bg-sage-bg", title: "One Dedicated Person", desc: "No rotating strangers. Your parent gets a single Fellow who knows their stories, their quirks, and how they take their coffee." },
+  { icon: BarChart3, color: "text-blue", bg: "bg-blue-bg", title: "You'll See the Difference", desc: "After every visit, track engagement, memory recall, and mood — so you know your parent is truly doing better, not just being watched." },
+  { icon: BookOpen, color: "text-gold", bg: "bg-gold-bg", title: "Their Stories Live On", desc: "Every visit captures a piece of who they are — memoirs, voice recordings, life lessons — preserved for your family forever." },
 ];
 
 const steps = [
-  { num: "01", title: "Take the Vibe Check", desc: "A 3-minute guided quiz that feels like telling a friend about someone you love." },
-  { num: "02", title: "Meet Your Kindred Match", desc: "Our AI matches based on personality, interests, and legacy goals \u2014 not just zip code." },
-  { num: "03", title: "Watch Them Bloom", desc: "After every visit, see the Daily Bloom \u2014 a beautiful social health summary." },
-  { num: "04", title: "Build a Legacy", desc: "Stories, recordings, and life lessons preserved for your family forever." },
+  { num: "01", title: "Tell Us About Your Parent", desc: "A 5-minute guided conversation about who they are, what they love, and what they need — it feels like telling a friend, not filling out a form." },
+  { num: "02", title: "We Find Their Person", desc: "Our matching algorithm pairs personality, interests, communication style, and care needs to find a Fellow who'll genuinely connect — not just show up." },
+  { num: "03", title: "Watch Them Bloom", desc: "After every visit, see the Daily Bloom — mood, engagement, memory recall, and conversation highlights tracked beautifully over time." },
+  { num: "04", title: "Build Their Legacy", desc: "Stories, voice recordings, and life lessons captured during every visit — preserved for your family forever." },
 ];
 
 const plans = [
@@ -49,9 +49,9 @@ export default function Landing() {
           initial="hidden" animate="visible" variants={fadeUp} custom={1}
           className="font-serif text-5xl sm:text-6xl font-semibold text-dark leading-[1.1] mb-6 tracking-tight"
         >
-          Companionship that{" "}
+          Your parent deserves{" "}
           <span className="bg-gradient-to-r from-sage to-sage-soft bg-clip-text text-transparent">
-            becomes family
+            more than a visit
           </span>
         </motion.h1>
 
@@ -59,8 +59,8 @@ export default function Landing() {
           initial="hidden" animate="visible" variants={fadeUp} custom={2}
           className="text-lg text-mid font-light leading-relaxed mb-10 max-w-xl mx-auto"
         >
-          Juni pairs your loved one with a dedicated Fellow — a trained companion who builds a real
-          relationship, captures their stories, and tracks their social well-being over time.
+          You can't always be there — but someone who truly <em>gets</em> them can. Juni matches your parent
+          with a dedicated Fellow based on who they actually are: their personality, their passions, their stories.
         </motion.p>
 
         <motion.div
@@ -71,8 +71,8 @@ export default function Landing() {
             Start the Vibe Check
             <ArrowRight size={16} />
           </Button>
-          <Button variant="secondary" size="lg" onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}>
-            View Plans
+          <Button variant="secondary" size="lg" onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}>
+            How It Works
           </Button>
         </motion.div>
       </section>
@@ -95,7 +95,7 @@ export default function Landing() {
       </section>
 
       {/* How it Works */}
-      <section className="bg-bg py-16 px-6">
+      <section id="how-it-works" className="bg-bg py-16 px-6">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <motion.h2
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
