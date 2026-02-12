@@ -465,8 +465,8 @@ export default function VibeCheck() {
           transition={{ delay: 0.3, duration: 0.5 }}
           className="text-base text-mid font-light leading-relaxed mb-3 max-w-sm mx-auto"
         >
-          Thank you for sharing so much about {parentName}. What you've told us isn't just data — it's
-          the roadmap to finding someone who'll truly <em>get</em> them.
+          Thank you for sharing so much about {parentName}. We're already finding Fellows
+          who match their personality, interests, and needs.
         </motion.p>
         <motion.p
           initial={{ opacity: 0, y: 16 }}
@@ -474,30 +474,36 @@ export default function VibeCheck() {
           transition={{ delay: 0.35, duration: 0.5 }}
           className="text-base text-mid font-light leading-relaxed mb-10 max-w-sm mx-auto"
         >
-          We're matching {parentName} with a Fellow now. You'll be able to review the match, see
-          their profile, and schedule a meet-and-greet — all from your dashboard.
+          Create your free account to see {parentName}'s top Fellow matches — we think
+          you'll love who we found.
         </motion.p>
 
-        {/* What happens next */}
+        {/* Match preview teaser */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.5 }}
-          className="bg-sage-bg rounded-2xl p-6 text-left max-w-sm mx-auto mb-10"
+          className="bg-sage-bg rounded-2xl p-6 max-w-sm mx-auto mb-10"
         >
-          <p className="text-xs text-sage font-semibold tracking-widest uppercase mb-3">What happens next</p>
-          <div className="flex flex-col gap-2.5">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="flex -space-x-3">
+              {["bg-sage", "bg-blue", "bg-gold"].map((c, i) => (
+                <div key={i} className={`w-10 h-10 rounded-full ${c} border-2 border-warm-white flex items-center justify-center`}>
+                  <Heart size={12} className="text-white" />
+                </div>
+              ))}
+            </div>
+            <p className="text-sm font-semibold text-dark m-0">3 matches found</p>
+          </div>
+          <div className="flex items-center justify-center gap-5">
             {[
-              "Our matching algorithm finds Fellows who fit",
-              "You'll review your top match within 24 hours",
-              "Schedule a video or in-person meet-and-greet",
-              "First visit — we check in after to make sure it's right",
-            ].map((text, i) => (
-              <div key={i} className="flex items-start gap-2.5 text-sm text-dark">
-                <span className="w-5 h-5 rounded-full bg-sage text-white text-xs flex items-center justify-center shrink-0 mt-0.5">
-                  {i + 1}
-                </span>
-                {text}
+              { v: "96%", l: "Top Match" },
+              { v: "91%", l: "2nd Match" },
+              { v: "89%", l: "3rd Match" },
+            ].map((s, i) => (
+              <div key={i} className="text-center">
+                <p className="text-lg font-bold text-sage m-0">{s.v}</p>
+                <p className="text-[10px] text-muted m-0">{s.l}</p>
               </div>
             ))}
           </div>
@@ -508,10 +514,11 @@ export default function VibeCheck() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.5 }}
         >
-          <Button size="lg" onClick={() => navigate("/family")}>
-            Go to Your Dashboard
+          <Button size="lg" onClick={() => navigate("/family/signup")}>
+            View Your Matches
             <ArrowRight size={16} />
           </Button>
+          <p className="text-xs text-light mt-3">Free to sign up · No credit card required</p>
         </motion.div>
       </PageWrapper>
     );
