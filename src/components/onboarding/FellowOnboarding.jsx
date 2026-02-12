@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -17,6 +17,7 @@ import {
   onboardingSteps, bgCheckTools, mockBgCheckResults, BG_CHECK_STATUS,
   safetyFramework, continuousMonitoring,
 } from "../../lib/constants";
+import useCheckrOnboarding from "../../hooks/useCheckrOnboarding";
 
 // ── Status Badge Component ──
 function CheckStatusBadge({ status }) {
@@ -54,6 +55,21 @@ export default function FellowOnboarding() {
   const [step, setStep] = useState(0);
   const [showWelcome, setShowWelcome] = useState(true);
 
+  // Checkr integration
+  const {
+    candidateId, reportId, checkrStatus, checkrResults, error: checkrError,
+    createDirectReport, pollReportStatus,
+  } = useCheckrOnboarding();
+
+  // Load application data from sign-up flow
+  const [applicantName, setApplicantName] = useState("Fellow");
+  useEffect(() => {
+    try {
+      const app = JSON.parse(localStorage.getItem("juni_fellow_application") || "{}");
+      if (app.firstName) setApplicantName(app.firstName);
+    } catch { /* ignore */ }
+  }, []);
+
   // Step 0: Consent
   const [consent, setConsent] = useState({ disclosure: false, fcra: false, authorized: false, drugTest: false, continuous: false });
   // Step 1: Identity Verification
@@ -72,8 +88,33 @@ export default function FellowOnboarding() {
   const [screening, setScreening] = useState({ scheduled: false, location: "", date: "" });
   // Step 6: Training
   const [training, setTraining] = useState({ orientation: false, safety: false, hipaa: false, elderCare: false, emergency: false });
-  // Step 7: Background Check Status
-  const [bgResults] = useState(mockBgCheckResults);
+  // Step 7: Background Check Status — use live Checkr results when available, fallback to mock
+  const [bgResults, setBgResults] = useState(mockBgCheckResults);
+
+  // When Checkr results arrive, merge them with mock data
+  useEffect(() => {
+    if (checkrResults) {
+      setBgResults(prev => ({ ...prev, ...checkrResults }));
+    }
+  }, [checkrResults]);
+
+  // Trigger Checkr report creation when consent is completed and user moves to step 1
+  const handleConsentComplete = useCallback(async () => {
+    if (candidateId && !reportId) {
+      try {
+        await createDirectReport();
+      } catch { /* handled by hook */ }
+    }
+    setStep(1);
+  }, [candidateId, reportId, createDirectReport]);
+
+  // Poll for Checkr results when on the final step
+  useEffect(() => {
+    if (step !== 7 || !reportId || checkrStatus === "complete") return;
+    const interval = setInterval(() => { pollReportStatus(); }, 30000);
+    pollReportStatus(); // immediate first poll
+    return () => clearInterval(interval);
+  }, [step, reportId, checkrStatus, pollReportStatus]);
 
   // Validation
   const allConsented = consent.disclosure && consent.fcra && consent.authorized && consent.drugTest && consent.continuous;
@@ -116,7 +157,7 @@ export default function FellowOnboarding() {
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
             className="text-base text-mid font-light leading-relaxed mb-2 max-w-md mx-auto"
           >
-            Welcome, Jordan. Juni maintains the strictest background screening in the industry to protect our seniors. This process ensures trust and safety for everyone.
+            Welcome, {applicantName}. Juni maintains the strictest background screening in the industry to protect our seniors. This process ensures trust and safety for everyone.
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
@@ -649,20 +690,39 @@ export default function FellowOnboarding() {
         </motion.div>
       </AnimatePresence>
 
+      {/* ── Checkr Status Indicator ── */}
+      {checkrStatus === "running" && step < 7 && (
+        <div className="mt-6 p-3 rounded-xl bg-blue-bg border border-blue/15">
+          <div className="flex items-center gap-2">
+            <RefreshCw size={12} className="text-blue animate-spin" style={{ animationDuration: "3s" }} />
+            <p className="text-xs text-blue font-medium m-0">
+              Background screening in progress via Checkr. Continue completing your steps while we process.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* ── Navigation Footer ── */}
       <div className="flex justify-between mt-10">
         <Button variant="secondary" onClick={() => step > 0 ? setStep(step - 1) : setShowWelcome(true)}>
           <ArrowLeft size={14} /> {step === 0 ? "Overview" : "Back"}
         </Button>
-        {step < onboardingSteps.length - 1 ? (
+        {step === 0 && (
+          <Button variant="blue" onClick={() => { if (canProceed[0]) handleConsentComplete(); }} disabled={!canProceed[0]}>
+            Authorize & Continue <ArrowRight size={14} />
+          </Button>
+        )}
+        {step > 0 && step < onboardingSteps.length - 1 && (
           <Button variant="blue" onClick={() => canProceed[step] && setStep(step + 1)} disabled={!canProceed[step]}>
             Continue <ArrowRight size={14} />
           </Button>
-        ) : allRequiredPassed ? (
-          <Button onClick={() => navigate("/fellow")}>
+        )}
+        {step === onboardingSteps.length - 1 && allRequiredPassed && (
+          <Button onClick={() => { localStorage.setItem("juni_fellow_cleared", "true"); navigate("/fellow"); }}>
             <ShieldCheck size={14} /> Access Fellow Portal
           </Button>
-        ) : (
+        )}
+        {step === onboardingSteps.length - 1 && !allRequiredPassed && (
           <Button disabled>
             <RefreshCw size={14} className="animate-spin" style={{ animationDuration: "3s" }} /> Awaiting Clearance
           </Button>

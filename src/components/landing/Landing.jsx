@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Heart, BarChart3, BookOpen, ArrowRight, Check, Minus, Sparkles, Shield, Eye, AlertTriangle, ShieldCheck } from "lucide-react";
+import { Heart, BarChart3, BookOpen, ArrowRight, Check, Minus, Sparkles, Shield, Eye, AlertTriangle, ShieldCheck, Users, Star, DollarSign, GraduationCap } from "lucide-react";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
 import Badge from "../ui/Badge";
@@ -237,6 +237,88 @@ export default function Landing() {
               </Button>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ── Become a Fellow ── */}
+      <section id="become-fellow" className="bg-bg py-16 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+              <Badge variant="blue" className="mb-4"><Users size={12} /> Become a Fellow</Badge>
+            </motion.div>
+            <motion.h2
+              initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}
+              className="font-serif text-4xl font-semibold mb-3"
+            >
+              Make a Living Making a Difference
+            </motion.h2>
+            <motion.p
+              initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={2}
+              className="text-base text-muted font-light max-w-lg mx-auto"
+            >
+              Juni Fellows aren&apos;t gig workers. You&apos;re a trained companion who builds real relationships
+              with seniors, preserves their legacy, and gets paid to make the world a little less lonely.
+            </motion.p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+            {[
+              { icon: Heart, color: "text-sage", bg: "bg-sage-bg", title: "Meaningful Work", desc: "Build lasting relationships with seniors. Hear their stories. Be the highlight of their week." },
+              { icon: DollarSign, color: "text-blue", bg: "bg-blue-bg", title: "Competitive Pay", desc: "Earn $22\u2013$35/hr with flexible scheduling. Weekly pay, benefits for full-time Fellows." },
+              { icon: GraduationCap, color: "text-gold", bg: "bg-gold-bg", title: "Professional Growth", desc: "Paid training in elder care, dementia awareness, and reminiscence therapy. Build a real career." },
+            ].map((item, i) => (
+              <motion.div key={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+                <Card hover className="h-full">
+                  <div className={`w-12 h-12 rounded-xl ${item.bg} flex items-center justify-center mb-5`}>
+                    <item.icon className={item.color} size={22} />
+                  </div>
+                  <h3 className="font-serif text-xl font-semibold mb-2.5">{item.title}</h3>
+                  <p className="text-sm text-mid font-light leading-relaxed m-0">{item.desc}</p>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={3}
+          >
+            <Card className="!bg-gradient-to-br !from-dark !to-[#2d2d2d] text-white">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+                <div className="flex-1">
+                  <h3 className="font-serif text-2xl font-semibold text-white mb-3">
+                    Ready to Become a Juni Fellow?
+                  </h3>
+                  <p className="text-sm text-white/60 leading-relaxed mb-4 m-0">
+                    Apply in 5 minutes. Our industry-leading background screening (powered by Checkr)
+                    ensures trust and safety for everyone. Once cleared, you&apos;ll be matched with seniors
+                    who share your interests and personality.
+                  </p>
+                  <div className="flex items-center gap-6">
+                    {[
+                      { v: "4.8", l: "Fellow Rating" },
+                      { v: "486+", l: "Avg Hours/Fellow" },
+                      { v: "94%", l: "Kindred Match" },
+                    ].map((s, i) => (
+                      <div key={i}>
+                        <p className="text-lg font-bold text-sage-soft m-0">{s.v}</p>
+                        <p className="text-[10px] text-white/40 m-0">{s.l}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="shrink-0">
+                  <Button variant="primary" size="lg" onClick={() => navigate("/fellow/signup")}>
+                    Apply Now <ArrowRight size={16} />
+                  </Button>
+                  <p className="text-[10px] text-white/30 text-center mt-3 m-0">
+                    <Shield size={10} className="inline mr-1" />
+                    Background check powered by Checkr
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
         </div>
       </section>
 
