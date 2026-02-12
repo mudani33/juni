@@ -7,6 +7,9 @@ import FellowOnboarding from "./components/onboarding/FellowOnboarding";
 import FamilyPortal from "./components/family/FamilyPortal";
 import FellowPortal from "./components/fellow/FellowPortal";
 import PartnerPortal from "./components/partner/PartnerPortal";
+import EmployerLanding from "./components/employer/EmployerLanding";
+import EmployerPortal from "./components/employer/EmployerPortal";
+import StrictGate from "./components/onboarding/StrictGate";
 
 export default function JuniPlatform() {
   return (
@@ -20,8 +23,10 @@ export default function JuniPlatform() {
               <Route path="/onboarding" element={<VibeCheck />} />
               <Route path="/family" element={<FamilyPortal />} />
               <Route path="/fellow/onboarding" element={<FellowOnboarding />} />
-              <Route path="/fellow" element={<FellowPortal />} />
+              <Route path="/fellow" element={<StrictGate><FellowPortal /></StrictGate>} />
               <Route path="/partner" element={<PartnerPortal />} />
+              <Route path="/employers" element={<EmployerLanding />} />
+              <Route path="/employer" element={<EmployerPortal />} />
             </Routes>
           </AnimatePresence>
         </main>

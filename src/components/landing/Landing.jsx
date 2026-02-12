@@ -1,9 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Heart, BarChart3, BookOpen, ArrowRight, Check, Minus, Sparkles } from "lucide-react";
+import { Heart, BarChart3, BookOpen, ArrowRight, Check, Minus, Sparkles, Shield, Eye, AlertTriangle, ShieldCheck } from "lucide-react";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
+import Badge from "../ui/Badge";
 import PageWrapper from "../layout/PageWrapper";
+import { safetyFramework } from "../../lib/constants";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -119,6 +121,75 @@ export default function Landing() {
             </motion.div>
           ))}
         </div>
+      </section>
+
+      {/* Trust & Safety */}
+      <section className="max-w-5xl mx-auto px-6 py-16">
+        <div className="text-center mb-12">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+            <Badge variant="blue" className="mb-4"><ShieldCheck size={12} /> Industry-Leading Safety</Badge>
+          </motion.div>
+          <motion.h2
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}
+            className="font-serif text-4xl font-semibold mb-3"
+          >
+            Safety That Never Sleeps
+          </motion.h2>
+          <motion.p
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={2}
+            className="text-base text-muted font-light max-w-lg mx-auto"
+          >
+            Every Fellow is screened across 1,300+ databases with TSA-grade identity verification, continuous monitoring, and zero-tolerance enforcement.
+          </motion.p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+          {Object.entries(safetyFramework).map(([key, phase], i) => {
+            const icons = { prevent: Shield, support: Eye, act: AlertTriangle };
+            const colors = { prevent: "text-blue", support: "text-sage", act: "text-gold" };
+            const bgs = { prevent: "bg-blue-bg", support: "bg-sage-bg", act: "bg-gold-bg" };
+            const Icon = icons[key];
+            return (
+              <motion.div key={key} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i}>
+                <Card hover className="h-full">
+                  <div className={`w-12 h-12 rounded-xl ${bgs[key]} flex items-center justify-center mb-5`}>
+                    <Icon className={colors[key]} size={22} />
+                  </div>
+                  <h3 className="font-serif text-xl font-semibold mb-1">{phase.title}</h3>
+                  <p className="text-xs text-muted mb-4">{phase.desc}</p>
+                  <ul className="flex flex-col gap-2 m-0 p-0 list-none">
+                    {phase.items.slice(0, 4).map((item, j) => (
+                      <li key={j} className="flex items-start gap-2">
+                        <Check size={12} className="text-sage shrink-0 mt-0.5" />
+                        <span className="text-sm text-mid font-light leading-snug">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        <motion.div
+          initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={3}
+          className="rounded-2xl bg-gradient-to-r from-[#2a2520] to-[#3d352d] text-white p-8 text-center"
+        >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+            {[
+              { v: "1,300+", l: "Databases Screened" },
+              { v: "9", l: "Verification Layers" },
+              { v: "24/7", l: "Continuous Monitoring" },
+              { v: "0", l: "Tolerance for Risk" },
+            ].map((s, i) => (
+              <div key={i}>
+                <p className="text-2xl font-bold text-white m-0">{s.v}</p>
+                <p className="text-xs text-white/50 mt-1 m-0">{s.l}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-white/40 m-0">Powered by Checkr · FCRA Compliant · SOC 2 Type II</p>
+        </motion.div>
       </section>
 
       {/* Pricing */}
