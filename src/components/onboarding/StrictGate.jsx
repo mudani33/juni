@@ -1,6 +1,6 @@
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ShieldAlert, ArrowRight } from "lucide-react";
+import { ShieldAlert, ArrowRight, Users } from "lucide-react";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
 import PageWrapper from "../layout/PageWrapper";
@@ -11,7 +11,9 @@ import PageWrapper from "../layout/PageWrapper";
  * For the prototype, it uses localStorage to simulate gating.
  */
 export default function StrictGate({ children }) {
+  const navigate = useNavigate();
   const cleared = localStorage.getItem("juni_fellow_cleared") === "true";
+  const hasApplication = !!localStorage.getItem("juni_fellow_application");
 
   if (cleared) return children;
 
@@ -30,17 +32,23 @@ export default function StrictGate({ children }) {
             </div>
             <div>
               <h2 className="font-serif text-2xl font-semibold text-dark mb-2">
-                Background Screening Required
+                {hasApplication ? "Background Screening Required" : "Application Required"}
               </h2>
               <p className="text-sm text-mid font-light leading-relaxed max-w-sm mx-auto mb-6">
-                All Fellows must complete Juni&apos;s comprehensive background screening before
-                accessing the Fellow Portal. This includes identity verification, criminal checks,
-                drug screening, and safety training.
+                {hasApplication
+                  ? "All Fellows must complete Juni's comprehensive background screening before accessing the Fellow Portal. This includes identity verification, criminal checks, drug screening, and safety training."
+                  : "To access the Fellow Portal, you need to submit your application first. It only takes 5 minutes."}
               </p>
             </div>
-            <Button variant="blue" size="lg" onClick={() => window.location.href = "/fellow/onboarding"}>
-              Complete Screening <ArrowRight size={16} />
-            </Button>
+            {hasApplication ? (
+              <Button variant="blue" size="lg" onClick={() => navigate("/fellow/onboarding")}>
+                Continue Screening <ArrowRight size={16} />
+              </Button>
+            ) : (
+              <Button variant="blue" size="lg" onClick={() => navigate("/fellow/signup")}>
+                <Users size={16} /> Apply to Be a Fellow
+              </Button>
+            )}
             <p className="text-xs text-muted">
               Already completed? Contact support@juni.com
             </p>
