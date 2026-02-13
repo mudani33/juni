@@ -18,11 +18,14 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const portalMeta = {
+    "/family/signup": { label: "Family Sign Up", color: "text-sage" },
     "/family": { label: "Family Portal", color: "text-sage" },
+    "/fellow/signup": { label: "Fellow Application", color: "text-blue" },
+    "/fellow/onboarding": { label: "Fellow Screening", color: "text-blue" },
     "/fellow": { label: "Fellow Portal", color: "text-blue" },
-    "/fellow/onboarding": { label: "Fellow Onboarding", color: "text-blue" },
     "/partner": { label: "Trust Partner Portal", color: "text-amber" },
     "/employer": { label: "Employer Portal", color: "text-purple" },
+    "/onboarding": { label: "Vibe Check", color: "text-sage" },
   };
 
   const currentMeta = Object.entries(portalMeta).find(([k]) => location.pathname.startsWith(k));

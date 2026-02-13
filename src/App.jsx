@@ -5,6 +5,7 @@ import Landing from "./components/landing/Landing";
 import VibeCheck from "./components/onboarding/VibeCheck";
 import FellowSignup from "./components/onboarding/FellowSignup";
 import FellowOnboarding from "./components/onboarding/FellowOnboarding";
+import FamilySignup from "./components/onboarding/FamilySignup";
 import FamilyPortal from "./components/family/FamilyPortal";
 import FellowPortal from "./components/fellow/FellowPortal";
 import PartnerPortal from "./components/partner/PartnerPortal";
@@ -22,6 +23,7 @@ export default function JuniPlatform() {
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/onboarding" element={<VibeCheck />} />
+              <Route path="/family/signup" element={<FamilySignup />} />
               <Route path="/family" element={<FamilyPortal />} />
               <Route path="/fellow/signup" element={<FellowSignup />} />
               <Route path="/fellow/onboarding" element={<FellowOnboarding />} />
