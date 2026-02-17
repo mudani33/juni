@@ -1,5 +1,6 @@
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart, BarChart3, BookOpen, ArrowRight, Check, Minus, Sparkles, Shield, Eye,
   AlertTriangle, ShieldCheck, Users, Star, DollarSign, GraduationCap, Clock,
@@ -41,6 +42,247 @@ const plans = [
   { name: "Premium", popular: true, feats: ["16 hours/month", "Priority matching", "Per-visit Daily Bloom", "Text + Audio Legacy", "Predictive Alerts"], no: ["Partner Integration"] },
   { name: "Legacy", feats: ["24+ hours/month", "Concierge matching", "Bloom + Audio per visit", "Full Legacy Vault", "Alerts + Clinical Escalation", "Trust Partner Integration"], no: [] },
 ];
+
+/* ═══════════════════════════════════════════════════════════════
+   Interactive "How It Works" stepper — tab toggle + auto-advance
+   ═══════════════════════════════════════════════════════════════ */
+
+const AUTO_ADVANCE_MS = 5000;
+
+/* Static class maps — Tailwind needs full class names at build time */
+const accentClasses = {
+  sage: {
+    toggleActive: "bg-sage text-white shadow-md",
+    stepActive: "border-sage bg-sage-bg shadow-sm",
+    iconActive: "bg-sage shadow-md",
+    iconPast: "bg-sage-bg",
+    checkColor: "text-sage",
+    labelColor: "text-sage",
+    progressBar: "bg-sage",
+    cardBorder: "border-sage/15",
+    iconBox: "bg-sage-bg",
+    iconColor: "text-sage",
+    divider: "bg-sage/10",
+    nextBtn: "text-sage",
+  },
+  blue: {
+    toggleActive: "bg-blue text-white shadow-md",
+    stepActive: "border-blue bg-blue-bg shadow-sm",
+    iconActive: "bg-blue shadow-md",
+    iconPast: "bg-blue-bg",
+    checkColor: "text-blue",
+    labelColor: "text-blue",
+    progressBar: "bg-blue",
+    cardBorder: "border-blue/15",
+    iconBox: "bg-blue-bg",
+    iconColor: "text-blue",
+    divider: "bg-blue/10",
+    nextBtn: "text-blue",
+  },
+};
+
+function HowItWorks({ navigate }) {
+  const [path, setPath] = useState("family");
+  const [active, setActive] = useState(0);
+  const [progress, setProgress] = useState(0);
+
+  const steps = path === "family" ? familySteps : fellowSteps;
+  const a = accentClasses[path === "family" ? "sage" : "blue"];
+  const cur = steps[active];
+  const StepIcon = cur.icon;
+
+  // Auto-advance with progress bar
+  useEffect(() => {
+    setProgress(0);
+    const tick = 50;
+    const inc = (tick / AUTO_ADVANCE_MS) * 100;
+    const interval = setInterval(() => {
+      setProgress((p) => {
+        if (p + inc >= 100) {
+          setActive((prev) => (prev + 1) % steps.length);
+          return 0;
+        }
+        return p + inc;
+      });
+    }, tick);
+    return () => clearInterval(interval);
+  }, [active, path, steps.length]);
+
+  const selectStep = useCallback((i) => {
+    setActive(i);
+    setProgress(0);
+  }, []);
+
+  const switchPath = useCallback((p) => {
+    setPath(p);
+    setActive(0);
+    setProgress(0);
+  }, []);
+
+  return (
+    <section id="how-it-works" className="bg-bg py-20 px-6">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-10">
+          <motion.h2
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
+            className="font-serif text-4xl font-semibold mb-3"
+          >
+            How Juni Works
+          </motion.h2>
+          <motion.p
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}
+            className="text-base text-muted font-light mb-8"
+          >
+            Two paths, one mission — ending senior loneliness.
+          </motion.p>
+
+          {/* ── Path Toggle ── */}
+          <motion.div
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={2}
+            className="inline-flex bg-warm-white rounded-2xl p-1.5 border border-border shadow-sm"
+          >
+            {[
+              { id: "family", label: "For Families", icon: Heart, activeCls: "bg-sage text-white shadow-md" },
+              { id: "fellow", label: "For Fellows", icon: Users, activeCls: "bg-blue text-white shadow-md" },
+            ].map(({ id, label, icon: Icon, activeCls }) => (
+              <button
+                key={id}
+                onClick={() => switchPath(id)}
+                className={`relative flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 border-none cursor-pointer ${
+                  path === id ? activeCls : "bg-transparent text-muted hover:text-dark"
+                }`}
+              >
+                <Icon size={15} />
+                {label}
+              </button>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* ── Step Selector ── */}
+        <motion.div
+          initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={3}
+        >
+          {/* Horizontal step buttons */}
+          <div className="flex items-center justify-between mb-2 gap-2">
+            {steps.map((s, i) => {
+              const Icon = s.icon;
+              const isActive = i === active;
+              const isPast = i < active;
+              return (
+                <button
+                  key={`${path}-${i}`}
+                  onClick={() => selectStep(i)}
+                  className={`flex-1 group relative flex flex-col items-center gap-2 py-4 px-2 rounded-2xl border-2 cursor-pointer transition-all duration-300 bg-transparent ${
+                    isActive
+                      ? a.stepActive
+                      : isPast
+                        ? "border-border bg-warm-white"
+                        : "border-transparent hover:border-border hover:bg-warm-white"
+                  }`}
+                >
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                    isActive
+                      ? a.iconActive
+                      : isPast
+                        ? a.iconPast
+                        : "bg-bg group-hover:bg-border"
+                  }`}>
+                    {isPast ? (
+                      <Check size={16} className={a.checkColor} />
+                    ) : (
+                      <Icon size={16} className={isActive ? "text-white" : "text-mid group-hover:text-dark"} />
+                    )}
+                  </div>
+                  <div className="text-center">
+                    <p className={`text-[10px] font-bold tracking-wider uppercase m-0 transition-colors duration-300 ${
+                      isActive ? a.labelColor : "text-light"
+                    }`}>
+                      Step {s.num}
+                    </p>
+                    <p className={`text-xs font-semibold m-0 mt-0.5 transition-colors duration-300 hidden sm:block ${
+                      isActive ? "text-dark" : "text-muted"
+                    }`}>
+                      {s.title}
+                    </p>
+                  </div>
+                  {/* Progress timer bar */}
+                  {isActive && (
+                    <div className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-border overflow-hidden">
+                      <div
+                        className={`h-full ${a.progressBar} rounded-full transition-none`}
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* ── Active Step Content Card ── */}
+          <div className="mt-6 min-h-[180px]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`${path}-${active}`}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className={`rounded-2xl border-2 ${a.cardBorder} bg-warm-white p-8 sm:p-10`}
+              >
+                <div className="flex flex-col sm:flex-row gap-6 items-start">
+                  {/* Large Icon */}
+                  <div className={`w-16 h-16 rounded-2xl ${a.iconBox} flex items-center justify-center shrink-0`}>
+                    <StepIcon size={28} className={a.iconColor} />
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className={`text-xs font-bold tracking-wider uppercase ${a.labelColor}`}>
+                        Step {cur.num}
+                      </span>
+                      <div className={`h-px flex-1 ${a.divider}`} />
+                    </div>
+                    <h3 className="font-serif text-2xl font-semibold text-dark mb-3 m-0">
+                      {cur.title}
+                    </h3>
+                    <p className="text-base text-mid font-light leading-relaxed m-0 mb-6">
+                      {cur.desc}
+                    </p>
+
+                    {/* CTA on last step, next-step hint otherwise */}
+                    {active === steps.length - 1 ? (
+                      <Button
+                        variant={path === "family" ? "primary" : "blue"}
+                        onClick={() => navigate(path === "family" ? "/onboarding" : "/fellow/signup")}
+                      >
+                        {path === "family" ? "Start the Vibe Check" : "Apply Now"}
+                        <ArrowRight size={14} />
+                      </Button>
+                    ) : (
+                      <button
+                        onClick={() => selectStep(active + 1)}
+                        className={`flex items-center gap-1.5 text-sm font-semibold ${a.nextBtn} bg-transparent border-none cursor-pointer hover:gap-2.5 transition-all duration-200 p-0`}
+                      >
+                        Next: {steps[active + 1].title}
+                        <ArrowRight size={13} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -165,79 +407,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ══════════ How It Works — Families ══════════ */}
-      <section id="how-it-works" className="bg-bg py-16 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <motion.h2
-              initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
-              className="font-serif text-4xl font-semibold mb-3"
-            >
-              How Juni Works
-            </motion.h2>
-            <motion.p
-              initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}
-              className="text-base text-muted font-light"
-            >
-              Two paths, one mission — ending senior loneliness.
-            </motion.p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            {/* Family Journey */}
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={2}>
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-sage-bg flex items-center justify-center">
-                  <Heart size={14} className="text-sage" />
-                </div>
-                <h3 className="font-serif text-lg font-semibold m-0">For Families</h3>
-              </div>
-              <div className="flex flex-col gap-5">
-                {familySteps.map((item, i) => (
-                  <div key={i} className="flex gap-4 items-start">
-                    <div className="w-10 h-10 rounded-full bg-warm-white border-2 border-sage flex items-center justify-center text-sage font-bold text-xs shrink-0 shadow-sm">
-                      {item.num}
-                    </div>
-                    <div>
-                      <h4 className="font-serif text-base font-semibold mb-1 m-0">{item.title}</h4>
-                      <p className="text-sm text-mid font-light leading-relaxed m-0">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-                <Button onClick={() => navigate("/onboarding")} className="self-start mt-2">
-                  Start the Vibe Check <ArrowRight size={14} />
-                </Button>
-              </div>
-            </motion.div>
-
-            {/* Fellow Journey */}
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={3}>
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-blue-bg flex items-center justify-center">
-                  <Users size={14} className="text-blue" />
-                </div>
-                <h3 className="font-serif text-lg font-semibold m-0">For Fellows</h3>
-              </div>
-              <div className="flex flex-col gap-5">
-                {fellowSteps.map((item, i) => (
-                  <div key={i} className="flex gap-4 items-start">
-                    <div className="w-10 h-10 rounded-full bg-warm-white border-2 border-blue flex items-center justify-center text-blue font-bold text-xs shrink-0 shadow-sm">
-                      {item.num}
-                    </div>
-                    <div>
-                      <h4 className="font-serif text-base font-semibold mb-1 m-0">{item.title}</h4>
-                      <p className="text-sm text-mid font-light leading-relaxed m-0">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-                <Button variant="blue" onClick={() => navigate("/fellow/signup")} className="self-start mt-2">
-                  Apply Now <ArrowRight size={14} />
-                </Button>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+      {/* ══════════ How It Works — Interactive Stepper ══════════ */}
+      <HowItWorks navigate={navigate} />
 
       {/* ══════════ Trust & Safety ══════════ */}
       <section className="max-w-5xl mx-auto px-6 py-16">
