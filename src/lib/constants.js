@@ -20,7 +20,7 @@ export const bgCheckTools = [
   { id: "sex_offender", name: "Sex Offender Registry", desc: "National Sex Offender Public Website (NSOPW) comprehensive search across all 50 states and territories", provider: "NSOPW Direct", required: true, estimatedDays: "1-2 days", category: "criminal" },
   { id: "elder_abuse", name: "Elder Abuse Registry", desc: "State elder abuse, neglect, and exploitation registry check — critical for senior safety", provider: "State Registry API", required: true, estimatedDays: "3-7 days", category: "criminal" },
   { id: "watchlist", name: "Global Watchlist", desc: "OIG exclusion list, global sanctions, and terrorism watchlist screening per CMS requirements", provider: "Checkr Global", required: true, estimatedDays: "1-2 days", category: "criminal" },
-  { id: "driving", name: "Motor Vehicle Records", desc: "Complete driving record check for transportation-eligible Fellows, including violation history", provider: "DMV Connect", required: false, estimatedDays: "1-3 days", category: "records" },
+  { id: "driving", name: "Motor Vehicle Records", desc: "Complete driving record check for transportation-eligible Companions, including violation history", provider: "DMV Connect", required: false, estimatedDays: "1-3 days", category: "records" },
   { id: "references", name: "Professional References", desc: "Minimum 3 professional references verified via phone and email — family members excluded", provider: "Internal Review Team", required: true, estimatedDays: "5-7 days", category: "verification" },
   { id: "education", name: "Education & Certification", desc: "Degree, certification, and relevant training validation through National Student Clearinghouse", provider: "National Student Clearinghouse", required: false, estimatedDays: "2-4 days", category: "verification" },
   { id: "drug_screen", name: "Drug Screening", desc: "10-panel drug test at authorized Quest Diagnostics lab, including opioids and synthetic drugs", provider: "Quest Diagnostics", required: true, estimatedDays: "2-3 days", category: "health" },
@@ -57,7 +57,7 @@ export const safetyFramework = {
     title: "Support",
     desc: "During-visit safety",
     items: [
-      "Digital Fellow ID badge verified by families",
+      "Digital Companion ID badge verified by families",
       "Masked phone numbers protect personal info",
       "GPS-verified visit check-in and check-out",
       "Real-time visit monitoring dashboard",
@@ -69,7 +69,7 @@ export const safetyFramework = {
     title: "Act",
     desc: "Post-incident response",
     items: [
-      "Immediate Fellow suspension upon any safety concern",
+      "Immediate Companion suspension upon any safety concern",
       "Dedicated Trust & Safety investigation team",
       "Annual full background re-screening",
       "Continuous criminal record monitoring",
@@ -81,7 +81,7 @@ export const safetyFramework = {
 
 // ── Continuous Monitoring (Post-Approval) ──
 export const continuousMonitoring = [
-  { name: "Annual Full Re-Check", desc: "Complete background check repeated every 12 months for all active Fellows", frequency: "Annually" },
+  { name: "Annual Full Re-Check", desc: "Complete background check repeated every 12 months for all active Companions", frequency: "Annually" },
   { name: "Continuous Criminal Monitoring", desc: "Real-time alerts triggered by any new criminal records across all jurisdictions", frequency: "Continuous" },
   { name: "Motor Vehicle Monitoring", desc: "Any driving flag triggers an immediate full MVR re-screen", frequency: "Continuous" },
   { name: "OIG Exclusion Screening", desc: "Monthly check against the OIG List of Excluded Individuals/Entities", frequency: "Monthly" },
@@ -133,7 +133,7 @@ export const partners = [
   { name: "Meridian Wealth Advisors", type: "Financial", sync: "Jan 20" },
 ];
 
-// ── Mock Data: Fellows ──
+// ── Mock Data: Companions ──
 export const fellowSeniors = [
   { id: 1, name: "Margaret (Maggie)", age: 78, next: "Tomorrow, 2:00 PM", streak: 24, kindred: 94, mood: "Joyful", tags: ["Italian cooking", "Travel", "Photography"] },
   { id: 2, name: "Robert (Bob)", age: 83, next: "Wed, 10:00 AM", streak: 18, kindred: 88, mood: "Calm", tags: ["Jazz", "Chess", "Military history"] },
@@ -148,7 +148,7 @@ export const training = [
   { id: 5, title: "Advanced Reminiscence Therapy", pct: 0, cat: "Specialty", hrs: 4 },
 ];
 
-export const fStats = { hours: 486, stories: 67, rating: 4.8, seniors: 3, tier: "Senior Fellow", monthly: [32, 35, 38, 40, 42, 44, 46, 44, 48, 46, 50, 52] };
+export const fStats = { hours: 486, stories: 67, rating: 4.8, seniors: 3, tier: "Senior Companion", monthly: [32, 35, 38, 40, 42, 44, 46, 44, 48, 46, 50, 52] };
 
 export const posts = [
   { id: 1, who: "Maya R.", av: "MR", txt: "Breakthrough moment today \u2014 Mr. Torres sang along to a song he hadn\u2019t remembered in months. The power of music never ceases to amaze.", likes: 24, time: "2h ago" },
@@ -256,7 +256,7 @@ export const employerPlans = [
     desc: "For companies beginning their caregiver support journey",
     features: [
       "Up to 8 hours/month per parent",
-      "Standard Fellow matching",
+      "Standard Companion matching",
       "Monthly utilization report",
       "Employee self-service onboarding",
       "Basic caregiver burden assessment",
@@ -287,7 +287,7 @@ export const employerPlans = [
     desc: "White-glove support for large organizations with complex needs",
     features: [
       "Unlimited hours per parent",
-      "Concierge Fellow matching",
+      "Concierge Companion matching",
       "Real-time analytics & predictive alerts",
       "Full Caregiver Burden Index + benchmarking",
       "Clinical outcomes + hospitalization tracking",
@@ -303,7 +303,7 @@ export const employerPlans = [
 ];
 
 export const employerB2BDifferentiators = [
-  { title: "Anti-Gig Model", desc: "Dedicated Fellows build real relationships with your employees' parents \u2014 no rotating strangers.", stat: "94%", statLabel: "Avg Kindred Match" },
+  { title: "Anti-Gig Model", desc: "Dedicated Companions build real relationships with your employees' parents \u2014 no rotating strangers.", stat: "94%", statLabel: "Avg Kindred Match" },
   { title: "Clinical-Grade Outcomes", desc: "Track engagement, memory recall, and mood with clinical rigor \u2014 not just satisfaction surveys.", stat: "87%", statLabel: "Engagement Score" },
   { title: "Caregiver Burden Index", desc: "Proprietary workplace-adapted ZBI that measures and reduces the hidden cost of caregiving.", stat: "47%", statLabel: "Burden Reduction" },
   { title: "Legacy Vault", desc: "Every visit creates a digital heirloom \u2014 stories, voice recordings, and life lessons preserved forever.", stat: "1,200+", statLabel: "Stories Captured" },
@@ -324,7 +324,7 @@ export const mockBgCheckResults = {
   sex_offender: { status: BG_CHECK_STATUS.PASSED, completedDate: "Feb 1, 2026", details: "No matches found in NSOPW database across all 50 states and territories." },
   elder_abuse: { status: BG_CHECK_STATUS.IN_PROGRESS, completedDate: null, details: "Awaiting response from state elder abuse and neglect registry. Estimated completion: Feb 10." },
   watchlist: { status: BG_CHECK_STATUS.PASSED, completedDate: "Feb 1, 2026", details: "Cleared against OIG exclusion list, global sanctions, and terrorism watchlist databases." },
-  driving: { status: BG_CHECK_STATUS.PENDING, completedDate: null, details: "Not yet initiated. Optional for non-transport Fellows." },
+  driving: { status: BG_CHECK_STATUS.PENDING, completedDate: null, details: "Not yet initiated. Optional for non-transport Companions." },
   references: { status: BG_CHECK_STATUS.IN_PROGRESS, completedDate: null, details: "2 of 3 professional references verified via phone and email. Awaiting response from third contact." },
   education: { status: BG_CHECK_STATUS.PASSED, completedDate: "Feb 3, 2026", details: "B.S. in Social Work confirmed, University of Michigan, 2022." },
   drug_screen: { status: BG_CHECK_STATUS.PASSED, completedDate: "Feb 2, 2026", details: "10-panel screen completed at Quest Diagnostics. All results negative." },

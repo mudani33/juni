@@ -19,7 +19,7 @@ const stepVariants = {
   exit: { opacity: 0, x: -40 },
 };
 
-export default function FellowSignup() {
+export default function CompanionSignup() {
   const navigate = useNavigate();
   const { initiateBackgroundCheck, checkrStatus, error: checkrError } = useCheckrOnboarding();
   const [step, setStep] = useState(0); // 0: welcome, 1: personal, 2: about, 3: submit/confirm
@@ -94,14 +94,14 @@ export default function FellowSignup() {
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
             className="font-serif text-4xl font-semibold text-dark mb-4 tracking-tight"
           >
-            Become a Juni Fellow
+            Become a Juni Companion
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
             className="text-base text-mid font-light leading-relaxed mb-2 max-w-md mx-auto"
           >
             You&apos;re not applying for a gig. You&apos;re joining a movement to end senior loneliness.
-            Juni Fellows are trained companions who build real, lasting relationships.
+            Juni Companions are trained companions who build real, lasting relationships.
           </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
@@ -142,10 +142,10 @@ export default function FellowSignup() {
           className="mb-10"
         >
           <Card className="!bg-bg">
-            <p className="text-xs text-muted uppercase tracking-widest font-semibold mb-4 m-0">Your Path to Becoming a Fellow</p>
+            <p className="text-xs text-muted uppercase tracking-widest font-semibold mb-4 m-0">Your Path to Becoming a Companion</p>
             <div className="flex flex-col gap-3">
               {[
-                { num: "1", title: "Quick Application", desc: "5 minutes \u2014 tell us about yourself and why you want to be a Fellow", active: true },
+                { num: "1", title: "Quick Application", desc: "5 minutes \u2014 tell us about yourself and why you want to be a Companion", active: true },
                 { num: "2", title: "Background Screening", desc: "Checkr-powered 9-layer verification across 1,300+ databases" },
                 { num: "3", title: "Safety Training", desc: "Complete mandatory orientation, HIPAA, and elder care modules" },
                 { num: "4", title: "Kindred Matching", desc: "Our AI matches you with seniors who share your interests and personality" },
@@ -222,7 +222,7 @@ export default function FellowSignup() {
           </Card>
 
           <div className="flex gap-3 justify-center flex-wrap">
-            <Button onClick={() => navigate("/fellow/onboarding")}>
+            <Button onClick={() => navigate("/companion/onboarding")}>
               Continue to Screening <ArrowRight size={14} />
             </Button>
             <Button variant="secondary" onClick={() => navigate("/")}>
@@ -259,7 +259,7 @@ export default function FellowSignup() {
               <p className="text-xs text-sage font-semibold tracking-widest uppercase m-0">
                 Step {step} of 2
               </p>
-              <p className="text-[11px] text-light m-0">Fellow Application</p>
+              <p className="text-[11px] text-light m-0">Companion Application</p>
             </div>
           </div>
           <Badge variant="sage" className="!text-[10px]">
@@ -328,12 +328,12 @@ export default function FellowSignup() {
             <div>
               <h2 className="font-serif text-3xl font-semibold text-dark mb-2 tracking-tight">Why Juni?</h2>
               <p className="text-base text-mid font-light leading-relaxed mb-8">
-                Help us understand why you&apos;d be a great Fellow. There are no wrong answers — we value authenticity.
+                Help us understand why you&apos;d be a great Companion. There are no wrong answers — we value authenticity.
               </p>
 
               <div className="flex flex-col gap-5">
                 <TextArea
-                  label="Why do you want to be a Juni Fellow?"
+                  label="Why do you want to be a Juni Companion?"
                   placeholder="Tell us what draws you to companionship work with seniors. Maybe you have a grandparent who inspired you, or you've seen the impact of loneliness firsthand..."
                   value={form.motivation}
                   onChange={e => set("motivation", e.target.value)}

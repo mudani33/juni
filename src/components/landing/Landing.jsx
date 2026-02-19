@@ -18,23 +18,23 @@ const fadeUp = {
 };
 
 const pillars = [
-  { icon: Heart, color: "text-sage", bg: "bg-sage-bg", title: "One Dedicated Person", desc: "No rotating strangers. Your parent gets a single Fellow who knows their stories, their quirks, and how they take their coffee." },
+  { icon: Heart, color: "text-sage", bg: "bg-sage-bg", title: "One Dedicated Person", desc: "No rotating strangers. Your parent gets a single Companion who knows their stories, their quirks, and how they take their coffee." },
   { icon: BarChart3, color: "text-blue", bg: "bg-blue-bg", title: "You'll See the Difference", desc: "After every visit, track engagement, memory recall, and mood — so you know your parent is truly doing better, not just being watched." },
   { icon: BookOpen, color: "text-gold", bg: "bg-gold-bg", title: "Their Stories Live On", desc: "Every visit captures a piece of who they are — memoirs, voice recordings, life lessons — preserved for your family forever." },
 ];
 
 const familySteps = [
-  { num: "01", icon: Search, title: "Take the Vibe Check", desc: "A 5-minute guided conversation about your parent — their personality, interests, care needs, and what matters most to you." },
-  { num: "02", icon: UserCheck, title: "Create Your Account", desc: "Sign up to see your parent's top Fellow matches, ranked by our Kindred matching algorithm." },
-  { num: "03", icon: CalendarCheck, title: "Meet Your Match", desc: "Review Fellow profiles, see why they fit, and schedule a video or in-person meet-and-greet." },
-  { num: "04", icon: Heart, title: "Watch Them Bloom", desc: "After every visit, see the Daily Bloom — mood, memory, engagement, and legacy moments captured beautifully." },
+  { num: "1", icon: Search, title: "Take the Vibe Check", desc: "A 5-minute guided conversation about your parent — their personality, interests, care needs, and what matters most to you." },
+  { num: "2", icon: UserCheck, title: "Create Your Account", desc: "Sign up to see your parent's top Companion matches, ranked by our Kindred matching algorithm." },
+  { num: "3", icon: CalendarCheck, title: "Meet Your Match", desc: "Review Companion profiles, see why they fit, and schedule a video or in-person meet-and-greet." },
+  { num: "4", icon: Heart, title: "Watch Them Bloom", desc: "After every visit, see the Daily Bloom — mood, memory, engagement, and legacy moments captured beautifully." },
 ];
 
-const fellowSteps = [
-  { num: "01", icon: Users, title: "Quick Application", desc: "5 minutes — tell us about yourself, your interests, and why you want to be a Fellow." },
-  { num: "02", icon: Shield, title: "Background Screening", desc: "Checkr-powered 9-layer verification across 1,300+ databases. TSA-grade identity checks." },
-  { num: "03", icon: GraduationCap, title: "Safety Training", desc: "Complete mandatory training in elder care, dementia awareness, HIPAA, and emergency response." },
-  { num: "04", icon: Handshake, title: "Get Matched & Start", desc: "Our AI matches you with seniors who share your interests and personality. Start visiting and get paid." },
+const companionSteps = [
+  { num: "1", icon: Users, title: "Quick Application", desc: "5 minutes — tell us about yourself, your interests, and why you want to be a Companion." },
+  { num: "2", icon: Shield, title: "Background Screening", desc: "Checkr-powered 9-layer verification across 1,300+ databases. TSA-grade identity checks." },
+  { num: "3", icon: GraduationCap, title: "Safety Training", desc: "Complete mandatory training in elder care, dementia awareness, HIPAA, and emergency response." },
+  { num: "4", icon: Handshake, title: "Get Matched & Start", desc: "Our AI matches you with seniors who share your interests and personality. Start visiting and get paid." },
 ];
 
 const plans = [
@@ -47,7 +47,7 @@ const plans = [
    Interactive "How It Works" stepper — tab toggle + auto-advance
    ═══════════════════════════════════════════════════════════════ */
 
-const AUTO_ADVANCE_MS = 5000;
+const AUTO_ADVANCE_MS = 3000;
 
 /* Static class maps — Tailwind needs full class names at build time */
 const accentClasses = {
@@ -86,7 +86,7 @@ function HowItWorks({ navigate }) {
   const [active, setActive] = useState(0);
   const [progress, setProgress] = useState(0);
 
-  const steps = path === "family" ? familySteps : fellowSteps;
+  const steps = path === "family" ? familySteps : companionSteps;
   const a = accentClasses[path === "family" ? "sage" : "blue"];
   const cur = steps[active];
   const StepIcon = cur.icon;
@@ -144,13 +144,13 @@ function HowItWorks({ navigate }) {
           >
             {[
               { id: "family", label: "For Families", icon: Heart, activeCls: "bg-sage text-white shadow-md" },
-              { id: "fellow", label: "For Fellows", icon: Users, activeCls: "bg-blue text-white shadow-md" },
+              { id: "companion", label: "For Companions", icon: Users, activeCls: "bg-blue text-white shadow-md" },
             ].map(({ id, label, icon: Icon, activeCls }) => (
               <button
                 key={id}
-                onClick={() => switchPath(id)}
+                onClick={() => switchPath(id === "companion" ? "companion" : id)}
                 className={`relative flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 border-none cursor-pointer ${
-                  path === id ? activeCls : "bg-transparent text-muted hover:text-dark"
+                  (id === "companion" ? path !== "family" : path === id) ? activeCls : "bg-transparent text-muted hover:text-dark"
                 }`}
               >
                 <Icon size={15} />
@@ -257,7 +257,7 @@ function HowItWorks({ navigate }) {
                     {active === steps.length - 1 ? (
                       <Button
                         variant={path === "family" ? "primary" : "blue"}
-                        onClick={() => navigate(path === "family" ? "/onboarding" : "/fellow/signup")}
+                        onClick={() => navigate(path === "family" ? "/onboarding" : "/companion/signup")}
                       >
                         {path === "family" ? "Start the Vibe Check" : "Apply Now"}
                         <ArrowRight size={14} />
@@ -322,11 +322,11 @@ export default function Landing() {
         >
           <Button size="lg" onClick={() => navigate("/onboarding")}>
             <Heart size={16} />
-            Find a Fellow for Your Parent
+            Find a Companion for Your Parent
           </Button>
-          <Button variant="dark" size="lg" onClick={() => navigate("/fellow/signup")}>
+          <Button variant="dark" size="lg" onClick={() => navigate("/companion/signup")}>
             <Users size={16} />
-            Become a Fellow
+            Become a Companion
           </Button>
         </motion.div>
       </section>
@@ -342,13 +342,13 @@ export default function Landing() {
                 <Heart className="text-sage" size={22} />
               </div>
               <Badge variant="sage" className="mb-3">For Families</Badge>
-              <h3 className="font-serif text-2xl font-semibold mb-2">Find a Fellow for Your Parent</h3>
+              <h3 className="font-serif text-2xl font-semibold mb-2">Find a Companion for Your Parent</h3>
               <p className="text-sm text-mid font-light leading-relaxed mb-5">
                 You can't always be there — but someone who truly gets them can. Take a 5-minute Vibe
                 Check and we'll match your parent with a companion based on who they actually are.
               </p>
               <div className="flex flex-col gap-2 mb-6">
-                {["5-min Vibe Check about your parent", "See top Fellow matches instantly", "Schedule a meet-and-greet", "Track social health after every visit"].map((item, i) => (
+                {["5-min Vibe Check about your parent", "See top Companion matches instantly", "Schedule a meet-and-greet", "Track social health after every visit"].map((item, i) => (
                   <div key={i} className="flex items-center gap-2 text-sm text-mid">
                     <Check size={13} className="text-sage shrink-0" />
                     <span className="font-light">{item}</span>
@@ -361,7 +361,7 @@ export default function Landing() {
             </Card>
           </motion.div>
 
-          {/* Fellow Path */}
+          {/* Companion Path */}
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}>
             <Card hover className="h-full relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue to-blue/70" />
@@ -369,9 +369,9 @@ export default function Landing() {
                 <Users className="text-blue" size={22} />
               </div>
               <Badge variant="blue" className="mb-3">For Companions</Badge>
-              <h3 className="font-serif text-2xl font-semibold mb-2">Become a Juni Fellow</h3>
+              <h3 className="font-serif text-2xl font-semibold mb-2">Become a Juni Companion</h3>
               <p className="text-sm text-mid font-light leading-relaxed mb-5">
-                This isn't a gig. Fellows are trained companions who build real relationships, preserve
+                This isn't a gig. Companions are trained individuals who build real relationships, preserve
                 legacy, and get paid to make the world a little less lonely.
               </p>
               <div className="flex flex-col gap-2 mb-6">
@@ -382,7 +382,7 @@ export default function Landing() {
                   </div>
                 ))}
               </div>
-              <Button variant="blue" onClick={() => navigate("/fellow/signup")} className="w-full">
+              <Button variant="blue" onClick={() => navigate("/companion/signup")} className="w-full">
                 Apply in 5 Minutes <ArrowRight size={14} />
               </Button>
             </Card>
@@ -426,7 +426,7 @@ export default function Landing() {
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={2}
             className="text-base text-muted font-light max-w-lg mx-auto"
           >
-            Every Fellow is screened across 1,300+ databases with TSA-grade identity verification, continuous monitoring, and zero-tolerance enforcement.
+            Every Companion is screened across 1,300+ databases with TSA-grade identity verification, continuous monitoring, and zero-tolerance enforcement.
           </motion.p>
         </div>
 
@@ -539,16 +539,16 @@ export default function Landing() {
             </h2>
             <p className="text-base text-white/60 font-light leading-relaxed mb-8 max-w-lg mx-auto">
               Whether you're looking for companionship for a parent or want to make a difference
-              as a Fellow — your journey starts here.
+              as a Companion — your journey starts here.
             </p>
             <div className="flex gap-3 justify-center flex-wrap mb-6">
               <Button size="lg" onClick={() => navigate("/onboarding")}>
                 <Heart size={16} />
-                Find a Fellow
+                Find a Companion
               </Button>
-              <Button variant="secondary" size="lg" className="!border-white/20 !text-white hover:!bg-white/10" onClick={() => navigate("/fellow/signup")}>
+              <Button variant="secondary" size="lg" className="!border-white/20 !text-white hover:!bg-white/10" onClick={() => navigate("/companion/signup")}>
                 <Users size={16} />
-                Become a Fellow
+                Become a Companion
               </Button>
             </div>
             <div className="flex items-center justify-center gap-8 pt-4 border-t border-white/10">

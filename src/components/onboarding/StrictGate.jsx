@@ -1,14 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ShieldAlert, ArrowRight, Users } from "lucide-react";
+import { ShieldAlert, ArrowRight, Users, Unlock } from "lucide-react";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
 import PageWrapper from "../layout/PageWrapper";
 
 /**
- * StrictGate — Route guard that enforces Fellow onboarding completion.
+ * StrictGate — Route guard that enforces Companion onboarding completion.
  * In production, this would check against a backend-stored clearance status.
  * For the prototype, it uses localStorage to simulate gating.
+ * Includes a demo bypass for sales presentations.
  */
 export default function StrictGate({ children }) {
   const navigate = useNavigate();
@@ -16,6 +17,12 @@ export default function StrictGate({ children }) {
   const hasApplication = !!localStorage.getItem("juni_fellow_application");
 
   if (cleared) return children;
+
+  const handleDemoAccess = () => {
+    localStorage.setItem("juni_fellow_cleared", "true");
+    localStorage.setItem("juni_fellow_application", JSON.stringify({ firstName: "Sarah", lastName: "Chen", demo: true }));
+    window.location.reload();
+  };
 
   return (
     <PageWrapper className="max-w-lg mx-auto px-6 py-24">
@@ -36,19 +43,27 @@ export default function StrictGate({ children }) {
               </h2>
               <p className="text-sm text-mid font-light leading-relaxed max-w-sm mx-auto mb-6">
                 {hasApplication
-                  ? "All Fellows must complete Juni's comprehensive background screening before accessing the Fellow Portal. This includes identity verification, criminal checks, drug screening, and safety training."
-                  : "To access the Fellow Portal, you need to submit your application first. It only takes 5 minutes."}
+                  ? "All Companions must complete Juni's comprehensive background screening before accessing the Companion Portal. This includes identity verification, criminal checks, drug screening, and safety training."
+                  : "To access the Companion Portal, you need to submit your application first. It only takes 5 minutes."}
               </p>
             </div>
             {hasApplication ? (
-              <Button variant="blue" size="lg" onClick={() => navigate("/fellow/onboarding")}>
+              <Button variant="blue" size="lg" onClick={() => navigate("/companion/onboarding")}>
                 Continue Screening <ArrowRight size={16} />
               </Button>
             ) : (
-              <Button variant="blue" size="lg" onClick={() => navigate("/fellow/signup")}>
-                <Users size={16} /> Apply to Be a Fellow
+              <Button variant="blue" size="lg" onClick={() => navigate("/companion/signup")}>
+                <Users size={16} /> Apply to Be a Companion
               </Button>
             )}
+            <div className="w-full border-t border-gold/10 pt-4 mt-1">
+              <button
+                onClick={handleDemoAccess}
+                className="flex items-center gap-2 mx-auto px-4 py-2 rounded-lg text-xs font-medium text-muted hover:text-dark hover:bg-warm-white transition-all border border-border bg-transparent cursor-pointer font-sans"
+              >
+                <Unlock size={12} /> Demo Access (Sales Preview)
+              </button>
+            </div>
             <p className="text-xs text-muted">
               Already completed? Contact support@juni.com
             </p>

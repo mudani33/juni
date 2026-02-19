@@ -22,7 +22,7 @@ const fadeUp = {
 
 const moodColors = { Joyful: "sage", Calm: "blue", Reflective: "purple" };
 
-export default function FellowPortal() {
+export default function CompanionPortal() {
   const [tab, setTab] = useState("seniors");
   const [logging, setLogging] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -158,9 +158,9 @@ export default function FellowPortal() {
           <Card className="!bg-gradient-to-r !from-blue/5 !to-sage/3">
             <div className="flex justify-between items-center">
               <h3 className="font-serif text-xl font-semibold m-0">Development Path</h3>
-              <Badge variant="blue">Senior Fellow</Badge>
+              <Badge variant="blue">Senior Companion</Badge>
             </div>
-            <p className="text-[13px] text-muted mt-2 m-0">Complete all core modules + 2 specialties to advance to Lead Fellow</p>
+            <p className="text-[13px] text-muted mt-2 m-0">Complete all core modules + 2 specialties to advance to Lead Companion</p>
           </Card>
           {training.map(c => (
             <Card key={c.id} hover>
@@ -247,7 +247,7 @@ export default function FellowPortal() {
               <h3 className="font-serif text-xl font-semibold m-0">Your Impact Statement</h3>
             </div>
             <p className="text-[15px] leading-relaxed font-light text-white/80 m-0">
-              In your time as a Juni Fellow, you have delivered {fStats.hours} hours of meaningful companionship to {fStats.seniors} seniors,
+              In your time as a Juni Companion, you have delivered {fStats.hours} hours of meaningful companionship to {fStats.seniors} seniors,
               helping create {fStats.stories} legacy stories that will be treasured by families for generations.
             </p>
           </Card>

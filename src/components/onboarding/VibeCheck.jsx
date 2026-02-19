@@ -70,7 +70,7 @@ const steps = [
   {
     id: "social",
     title: "Their Social World",
-    sub: "How do they connect with people? This helps us find a Fellow whose energy matches theirs.",
+    sub: "How do they connect with people? This helps us find a Companion whose energy matches theirs.",
     icon: Heart,
     kind: "multi",
     opts: [
@@ -172,7 +172,7 @@ const steps = [
   {
     id: "heart",
     title: "The Heart of It",
-    sub: "You know your parent better than anyone. These answers help us understand where they are emotionally — so their Fellow can meet them with exactly the right energy.",
+    sub: "You know your parent better than anyone. These answers help us understand where they are emotionally — so their Companion can meet them with exactly the right energy.",
     icon: Shield,
     kind: "emotional",
     changes: [
@@ -200,7 +200,7 @@ const steps = [
       },
       {
         key: "sensitiveTopics",
-        label: "Anything a Fellow should approach with care?",
+        label: "Anything a Companion should approach with care?",
         placeholder: "e.g. Don't bring up their late husband Harold, avoid discussing the move from their house…",
       },
     ],
@@ -238,7 +238,7 @@ const steps = [
   },
   {
     id: "fellow",
-    title: "The Perfect Fellow",
+    title: "The Perfect Companion",
     sub: "If you could design the ideal companion for your parent, what qualities would matter most?",
     icon: Star,
     kind: "match",
@@ -261,7 +261,7 @@ const steps = [
     preferences: [
       {
         key: "genderPref",
-        label: "Gender preference for Fellow",
+        label: "Gender preference for Companion",
         type: "select",
         options: ["No preference", "Female", "Male"],
       },
@@ -394,7 +394,7 @@ export default function VibeCheck() {
           className="text-base text-mid font-light leading-relaxed mb-10 max-w-md mx-auto"
         >
           This short questionnaire helps us understand your parent as a <em>person</em> — their personality,
-          their passions, their world — so we can match them with a Fellow who'll genuinely connect,
+          their passions, their world — so we can match them with a Companion who'll genuinely connect,
           not just show up.
         </motion.p>
         <motion.div
@@ -423,7 +423,7 @@ export default function VibeCheck() {
               { icon: Sun, text: "What they love and what lights them up" },
               { icon: Clock, text: "Their daily life and care needs" },
               { icon: Heart, text: "Where they are emotionally" },
-              { icon: Star, text: "What you're hoping for in a Fellow" },
+              { icon: Star, text: "What you're hoping for in a Companion" },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-3 text-sm text-mid">
                 <div className="w-8 h-8 rounded-lg bg-sage-bg flex items-center justify-center shrink-0">
@@ -465,7 +465,7 @@ export default function VibeCheck() {
           transition={{ delay: 0.3, duration: 0.5 }}
           className="text-base text-mid font-light leading-relaxed mb-3 max-w-sm mx-auto"
         >
-          Thank you for sharing so much about {parentName}. We're already finding Fellows
+          Thank you for sharing so much about {parentName}. We're already finding Companions
           who match their personality, interests, and needs.
         </motion.p>
         <motion.p
@@ -474,7 +474,7 @@ export default function VibeCheck() {
           transition={{ delay: 0.35, duration: 0.5 }}
           className="text-base text-mid font-light leading-relaxed mb-10 max-w-sm mx-auto"
         >
-          Create your free account to see {parentName}'s top Fellow matches — we think
+          Create your free account to see {parentName}'s top Companion matches — we think
           you'll love who we found.
         </motion.p>
 
@@ -711,7 +711,7 @@ export default function VibeCheck() {
             </div>
           )}
 
-          {/* ─── Fellow preferences (The Perfect Fellow) ─── */}
+          {/* ─── Companion preferences (The Perfect Companion) ─── */}
           {cur.kind === "match" && (
             <div className="flex flex-col gap-8">
               <div>
@@ -763,7 +763,7 @@ export default function VibeCheck() {
           Back
         </Button>
         <Button onClick={goNext}>
-          {step < steps.length - 1 ? "Continue" : "Find Their Fellow"}
+          {step < steps.length - 1 ? "Continue" : "Find Their Companion"}
           <ArrowRight size={14} />
         </Button>
       </div>

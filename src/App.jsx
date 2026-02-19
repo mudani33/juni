@@ -25,9 +25,9 @@ export default function JuniPlatform() {
               <Route path="/onboarding" element={<VibeCheck />} />
               <Route path="/family/signup" element={<FamilySignup />} />
               <Route path="/family" element={<FamilyPortal />} />
-              <Route path="/fellow/signup" element={<FellowSignup />} />
-              <Route path="/fellow/onboarding" element={<FellowOnboarding />} />
-              <Route path="/fellow" element={<StrictGate><FellowPortal /></StrictGate>} />
+              <Route path="/companion/signup" element={<FellowSignup />} />
+              <Route path="/companion/onboarding" element={<FellowOnboarding />} />
+              <Route path="/companion" element={<StrictGate><FellowPortal /></StrictGate>} />
               <Route path="/partner" element={<PartnerPortal />} />
               <Route path="/employers" element={<EmployerLanding />} />
               <Route path="/employer" element={<EmployerPortal />} />

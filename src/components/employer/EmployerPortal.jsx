@@ -534,7 +534,7 @@ export default function EmployerPortal() {
                       {emp.status === "Active" && (
                         <>
                           <div>
-                            <p className="text-[10px] text-muted uppercase tracking-wider m-0">Fellow</p>
+                            <p className="text-[10px] text-muted uppercase tracking-wider m-0">Companion</p>
                             <p className="text-sm text-dark m-0">{emp.fellow}</p>
                           </div>
                           <div>
@@ -574,10 +574,10 @@ export default function EmployerPortal() {
             <div className="flex items-start gap-3">
               <ShieldCheck size={20} className="text-blue shrink-0 mt-0.5" />
               <div>
-                <h3 className="font-serif text-base font-semibold text-dark mb-1 m-0">Every Fellow is Fully Vetted</h3>
+                <h3 className="font-serif text-base font-semibold text-dark mb-1 m-0">Every Companion is Fully Vetted</h3>
                 <p className="text-[13px] text-mid leading-relaxed m-0">
-                  All {employerStats.activeParents} active parents are matched with Fellows who have passed Juni&apos;s 9-layer
-                  background screening across 1,300+ databases. Every Fellow undergoes continuous monitoring,
+                  All {employerStats.activeParents} active parents are matched with Companions who have passed Juni&apos;s 9-layer
+                  background screening across 1,300+ databases. Every Companion undergoes continuous monitoring,
                   annual re-screening, and monthly OIG exclusion checks. Your employees&apos; parents are in the safest hands in the industry.
                 </p>
               </div>

@@ -51,7 +51,7 @@ export default function FamilyPortal() {
             </div>
             <div className="flex gap-7 flex-wrap">
               <div>
-                <p className="text-[11px] text-light uppercase tracking-widest m-0">Fellow</p>
+                <p className="text-[11px] text-light uppercase tracking-widest m-0">Companion</p>
                 <div className="flex items-center gap-2 mt-1">
                   <Avatar initials="SC" size="sm" color="sage" />
                   <span className="text-sm font-medium text-dark">{seniorData.fellow}</span>
