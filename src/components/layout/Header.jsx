@@ -7,7 +7,7 @@ import Avatar from "../ui/Avatar";
 const navItems = [
   { path: "/", label: "Home", icon: Home },
   { path: "/family", label: "Family", icon: Heart, color: "text-sage" },
-  { path: "/fellow", label: "Fellow", icon: Users, color: "text-blue" },
+  { path: "/companion", label: "Companion", icon: Users, color: "text-blue" },
   { path: "/partner", label: "Partner", icon: Handshake, color: "text-amber" },
   { path: "/employer", label: "Employer", icon: Building2, color: "text-purple" },
 ];
@@ -20,16 +20,16 @@ export default function Header() {
   const portalMeta = {
     "/family/signup": { label: "Family Sign Up", color: "text-sage" },
     "/family": { label: "Family Portal", color: "text-sage" },
-    "/fellow/signup": { label: "Fellow Application", color: "text-blue" },
-    "/fellow/onboarding": { label: "Fellow Screening", color: "text-blue" },
-    "/fellow": { label: "Fellow Portal", color: "text-blue" },
+    "/companion/signup": { label: "Companion Application", color: "text-blue" },
+    "/companion/onboarding": { label: "Companion Screening", color: "text-blue" },
+    "/companion": { label: "Companion Portal", color: "text-blue" },
     "/partner": { label: "Trust Partner Portal", color: "text-amber" },
     "/employer": { label: "Employer Portal", color: "text-purple" },
     "/onboarding": { label: "Vibe Check", color: "text-sage" },
   };
 
   const currentMeta = Object.entries(portalMeta).find(([k]) => location.pathname.startsWith(k));
-  const avatarInitials = location.pathname.startsWith("/fellow") ? "SC"
+  const avatarInitials = location.pathname.startsWith("/companion") ? "SC"
     : location.pathname.startsWith("/partner") ? "MW"
     : location.pathname.startsWith("/employer") ? "RT" : "LR";
 

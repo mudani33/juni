@@ -27,7 +27,7 @@ const crisisStats = [
 ];
 
 const juniVsPapa = [
-  { feature: "Companion model", juni: "Dedicated Fellow (anti-gig)", papa: "Rotating Pals" },
+  { feature: "Companion model", juni: "Dedicated Companion (anti-gig)", papa: "Rotating Pals" },
   { feature: "Background screening", juni: "9-layer, 1,300+ databases", papa: "Standard checks" },
   { feature: "Health outcomes", juni: "Clinical-grade (engagement, memory, mood)", papa: "Satisfaction surveys" },
   { feature: "Caregiver burden tracking", juni: "Proprietary Burden Index (ZBI-adapted)", papa: "Not offered" },
@@ -329,7 +329,7 @@ export default function EmployerLanding() {
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={2}
             className="text-base text-muted font-light max-w-lg mx-auto"
           >
-            Every Fellow undergoes the most comprehensive background screening in elder care. Period.
+            Every Companion undergoes the most comprehensive background screening in elder care. Period.
           </motion.p>
         </div>
 

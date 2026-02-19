@@ -50,7 +50,7 @@ const stepVariants = {
   exit: { opacity: 0, x: -50 },
 };
 
-export default function FellowOnboarding() {
+export default function CompanionOnboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [showWelcome, setShowWelcome] = useState(true);
@@ -62,7 +62,7 @@ export default function FellowOnboarding() {
   } = useCheckrOnboarding();
 
   // Load application data from sign-up flow
-  const [applicantName, setApplicantName] = useState("Fellow");
+  const [applicantName, setApplicantName] = useState("Companion");
   useEffect(() => {
     try {
       const app = JSON.parse(localStorage.getItem("juni_fellow_application") || "{}");
@@ -151,7 +151,7 @@ export default function FellowOnboarding() {
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
             className="font-serif text-4xl font-semibold text-dark mb-4 tracking-tight"
           >
-            Fellow Safety Onboarding
+            Companion Safety Onboarding
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
@@ -245,7 +245,7 @@ export default function FellowOnboarding() {
             </div>
           </div>
           <Badge variant="blue" className="!text-[10px]">
-            <Shield size={10} /> Fellow Screening
+            <Shield size={10} /> Companion Screening
           </Badge>
         </div>
       </div>
@@ -271,7 +271,7 @@ export default function FellowOnboarding() {
                     <p className="font-serif text-[15px] font-semibold text-dark mb-2 m-0">Senior Safety Commitment</p>
                     <p className="text-[13px] text-mid leading-relaxed m-0">
                       Juni goes <strong>beyond the industry standard</strong> with multi-layer verification across 1,300+ federal,
-                      state, county, and international databases. Every Fellow undergoes TSA-grade identity verification,
+                      state, county, and international databases. Every Companion undergoes TSA-grade identity verification,
                       comprehensive criminal screening with manual human review, and continuous post-approval monitoring.
                       This is non-negotiable.
                     </p>
@@ -281,10 +281,10 @@ export default function FellowOnboarding() {
 
               {[
                 { k: "disclosure", label: "I acknowledge that Juni will conduct the most comprehensive background investigation in the elder care industry, including identity verification, criminal records, sex offender registries, elder abuse registries, global watchlists, drug screening, and reference verification." },
-                { k: "fcra", label: "I have read and understand the Summary of Rights Under the Fair Credit Reporting Act (FCRA) and authorize Juni and its partner Checkr to obtain consumer reports for the purpose of evaluating my suitability as a Fellow." },
+                { k: "fcra", label: "I have read and understand the Summary of Rights Under the Fair Credit Reporting Act (FCRA) and authorize Juni and its partner Checkr to obtain consumer reports for the purpose of evaluating my suitability as a Companion." },
                 { k: "authorized", label: "I authorize the release of information from all federal, state, local, and international agencies, including law enforcement, to verify my identity and suitability. I understand this includes manual courthouse review of non-digitized records." },
-                { k: "drugTest", label: "I consent to pre-engagement and random drug testing as a condition of my Fellow role. I understand that refusal to test or a positive result for any controlled substance constitutes automatic and permanent disqualification." },
-                { k: "continuous", label: "I consent to continuous criminal record monitoring, annual full background re-screening, and monthly OIG exclusion list checks for the duration of my engagement as a Fellow." },
+                { k: "drugTest", label: "I consent to pre-engagement and random drug testing as a condition of my Companion role. I understand that refusal to test or a positive result for any controlled substance constitutes automatic and permanent disqualification." },
+                { k: "continuous", label: "I consent to continuous criminal record monitoring, annual full background re-screening, and monthly OIG exclusion list checks for the duration of my engagement as a Companion." },
               ].map(item => (
                 <motion.div key={item.k} whileTap={{ scale: 0.995 }}>
                   <Card
@@ -529,7 +529,7 @@ export default function FellowOnboarding() {
                 </div>
               </Card>
               {[
-                { k: "orientation", title: "Juni Orientation", desc: "Platform overview, Fellow role expectations, and scope of services", duration: "15 min" },
+                { k: "orientation", title: "Juni Orientation", desc: "Platform overview, Companion role expectations, and scope of services", duration: "15 min" },
                 { k: "safety", title: "Senior Safety & Boundaries", desc: "Physical safety protocols, professional boundaries, and incident reporting", duration: "25 min" },
                 { k: "hipaa", title: "HIPAA & Privacy Compliance", desc: "Handling sensitive health information, confidentiality, and CMS fraud/waste/abuse", duration: "20 min" },
                 { k: "elderCare", title: "Elder Care Essentials", desc: "Dementia awareness, fall prevention, emergency recognition, cultural competency", duration: "30 min" },
@@ -586,7 +586,7 @@ export default function FellowOnboarding() {
                     </div>
                     <p className="text-sm text-mid font-light m-0">
                       {allRequiredPassed
-                        ? "All required background checks have passed. You are cleared to begin as a Juni Fellow."
+                        ? "All required background checks have passed. You are cleared to begin as a Juni Companion."
                         : hasFailure
                           ? "One or more required checks have failed. Please contact our Trust & Safety team."
                           : "Your background checks are being processed across 1,300+ databases. We\u2019ll notify you when complete."}
@@ -678,7 +678,7 @@ export default function FellowOnboarding() {
                   <div>
                     <p className="font-serif text-sm font-semibold text-dark mb-1 m-0">Zero-Tolerance Compliance Policy</p>
                     <p className="text-[13px] text-mid leading-relaxed m-0">
-                      All required background checks must pass before any Fellow can be matched with a senior.
+                      All required background checks must pass before any Companion can be matched with a senior.
                       Results are valid for 12 months with mandatory annual renewal. Any failed required check triggers
                       immediate suspension. Juni maintains the strictest safety standards in the elder care industry — no exceptions.
                     </p>
@@ -718,8 +718,8 @@ export default function FellowOnboarding() {
           </Button>
         )}
         {step === onboardingSteps.length - 1 && allRequiredPassed && (
-          <Button onClick={() => { localStorage.setItem("juni_fellow_cleared", "true"); navigate("/fellow"); }}>
-            <ShieldCheck size={14} /> Access Fellow Portal
+          <Button onClick={() => { localStorage.setItem("juni_fellow_cleared", "true"); navigate("/companion"); }}>
+            <ShieldCheck size={14} /> Access Companion Portal
           </Button>
         )}
         {step === onboardingSteps.length - 1 && !allRequiredPassed && (

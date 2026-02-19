@@ -156,7 +156,7 @@ export default function FamilySignup() {
           transition={{ delay: 0.3 }}
           className="text-base text-mid font-light leading-relaxed mb-10 max-w-sm mx-auto"
         >
-          Your account is set up. Let's meet the Fellows we've matched for {parentName} — you
+          Your account is set up. Let's meet the Companions we've matched for {parentName} — you
           can review their profiles, read why they're a fit, and schedule a meet-and-greet.
         </motion.p>
         <motion.div
@@ -192,7 +192,7 @@ export default function FamilySignup() {
             custom={1}
             className="font-serif text-4xl sm:text-5xl font-semibold text-dark mb-4 tracking-tight"
           >
-            Great news — we found Fellows for{" "}
+            Great news — we found Companions for{" "}
             <span className="bg-gradient-to-r from-sage to-sage-soft bg-clip-text text-transparent">
               {parentName}
             </span>
@@ -325,7 +325,7 @@ export default function FamilySignup() {
               Create Your Account
             </h2>
             <p className="text-sm text-mid font-light mb-6">
-              Set up your family account to view full Fellow profiles, schedule a meet-and-greet,
+              Set up your family account to view full Companion profiles, schedule a meet-and-greet,
               and start building {parentName}'s trust circle.
             </p>
 
@@ -447,7 +447,7 @@ export default function FamilySignup() {
                   />
                   <span className="text-xs text-mid leading-relaxed">
                     I agree to Juni's Terms of Service and Privacy Policy. I understand that
-                    my information will be used to match my family member with a Fellow and to
+                    my information will be used to match my family member with a Companion and to
                     provide ongoing social health tracking.
                   </span>
                 </label>
