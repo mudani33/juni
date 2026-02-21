@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import {
   Users, BookOpen, MessageCircle, Sparkles, ArrowLeft, Heart, Send, Clock, Star,
   Brain, Lightbulb, Music, Coffee, MapPin, TrendingUp, AlertTriangle, Check,
+  CreditCard, Calendar, CheckCircle2, Smile,
 } from "lucide-react";
 import { Card, TabNav, Badge, Avatar, Stat, ProgressBar, VitalsChart } from "../ui";
 import Button from "../ui/Button";
@@ -10,6 +11,8 @@ import { TextArea } from "../ui/Input";
 import PageWrapper from "../layout/PageWrapper";
 import Footer from "../layout/Footer";
 import { fellowSeniors, training, fStats, posts, MONTHS } from "../../lib/constants";
+import CompanionBilling from "./CompanionBilling";
+import CompanionSchedule from "./CompanionSchedule";
 
 const tabs = [
   { id: "seniors", label: "My Seniors", icon: "\uD83D\uDC65" },
@@ -24,6 +27,17 @@ const fadeUp = {
 };
 
 const moodColors = { Joyful: "sage", Calm: "blue", Reflective: "purple" };
+
+/* ── Mood options for the visit log ── */
+const moodOptions = [
+  { value: "amazing", emoji: "😄", label: "Amazing", color: "border-sage bg-sage-bg text-sage" },
+  { value: "good", emoji: "😊", label: "Good", color: "border-blue bg-blue-bg text-blue" },
+  { value: "decent", emoji: "🙂", label: "Decent", color: "border-purple bg-purple-bg text-purple" },
+  { value: "quiet", emoji: "😐", label: "Quiet", color: "border-gold bg-gold-bg text-gold" },
+  { value: "difficult", emoji: "😔", label: "Difficult", color: "border-amber-300 bg-amber-50 text-amber-600" },
+];
+
+const inactiveMood = "border-border bg-warm-white text-muted hover:bg-bg";
 
 /* ── AI visit prep suggestions per senior ── */
 const aiVisitPrep = {
@@ -66,15 +80,44 @@ const aiVisitPrep = {
   },
 };
 
+const visitActivities = [
+  "Cooking together", "Looking at photos", "Music & singing", "Reading aloud",
+  "Board games / cards", "Walking outdoors", "Crafts & art", "Life story recording",
+];
+
 export default function CompanionPortal() {
   const [tab, setTab] = useState("seniors");
-  const [logging, setLogging] = useState(false);
+  const [view, setView] = useState("dash"); // "dash" | "billing" | "schedule"
+  const [loggingFor, setLoggingFor] = useState(null); // senior id
   const [submitted, setSubmitted] = useState(false);
-  const [notes, setNotes] = useState({ talk: "", next: "", concern: "" });
+  const [notes, setNotes] = useState({ highlight: "", talked: "", memories: "", nextTime: "", concern: "" });
+  const [moodStart, setMoodStart] = useState(null);
+  const [moodEnd, setMoodEnd] = useState(null);
+  const [selectedActivities, setSelectedActivities] = useState([]);
   const [expandedSenior, setExpandedSenior] = useState(1);
+  const [postText, setPostText] = useState("");
 
-  // Visit submitted
-  if (logging && submitted) {
+  const toggleActivity = (a) =>
+    setSelectedActivities(prev => prev.includes(a) ? prev.filter(x => x !== a) : [...prev, a]);
+
+  const resetLog = () => {
+    setLoggingFor(null);
+    setSubmitted(false);
+    setNotes({ highlight: "", talked: "", memories: "", nextTime: "", concern: "" });
+    setMoodStart(null);
+    setMoodEnd(null);
+    setSelectedActivities([]);
+  };
+
+  const loggingSenior = fellowSeniors.find(s => s.id === loggingFor);
+
+  // ── Routing ──
+  if (view === "billing") return <CompanionBilling onBack={() => setView("dash")} />;
+  if (view === "schedule") return <CompanionSchedule onBack={() => setView("dash")} />;
+
+  // ── Visit submitted success screen ──
+  if (loggingFor && submitted) {
+    const endMood = moodOptions.find(m => m.value === moodEnd);
     return (
       <PageWrapper className="max-w-xl mx-auto px-6 pt-12">
         <Card className="text-center !py-12">
@@ -88,9 +131,16 @@ export default function CompanionPortal() {
           </motion.div>
           <h2 className="font-serif text-2xl font-semibold text-dark mb-3 m-0">Visit Logged</h2>
           <p className="text-[15px] text-mid font-light leading-relaxed mb-6 m-0 max-w-sm mx-auto">
-            Notes are being processed. Maggie&apos;s family will see the Daily Bloom within 30 minutes.
+            Notes for <strong>{loggingSenior?.name.split(" ")[0]}</strong> are being processed.
+            {loggingFor === 1 && " Their family will see an updated Daily Bloom within 30 minutes."}
           </p>
-          <Button variant="blue" onClick={() => { setLogging(false); setSubmitted(false); }}>
+          {endMood && (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-bg rounded-full mb-6">
+              <span className="text-xl">{endMood.emoji}</span>
+              <span className="text-sm text-mid">Ended the visit feeling <strong className="text-dark">{endMood.label}</strong></span>
+            </div>
+          )}
+          <Button variant="blue" onClick={resetLog}>
             Return to Dashboard
           </Button>
         </Card>
@@ -98,33 +148,151 @@ export default function CompanionPortal() {
     );
   }
 
-  // Visit logging form
-  if (logging) {
+  // ── Visit logging form ──
+  if (loggingFor) {
+    const senior = loggingSenior;
     return (
       <PageWrapper className="max-w-xl mx-auto px-6 pt-6 pb-16">
-        <Button variant="ghost" size="sm" onClick={() => setLogging(false)} className="mb-6 !text-blue">
+        <Button variant="ghost" size="sm" onClick={resetLog} className="mb-6 !text-blue">
           <ArrowLeft size={14} /> Back
         </Button>
-        <h2 className="font-serif text-2xl font-semibold mb-2 m-0">Log Visit with Maggie</h2>
-        <p className="text-sm text-muted mb-7 m-0">February 8, 2026 · 10:00 AM – 12:00 PM</p>
-        <div className="flex flex-col gap-5">
-          <TextArea label="What did you talk about today?" placeholder="Maggie shared stories about Florence\u2026"
-            value={notes.talk} onChange={e => setNotes({ ...notes, talk: e.target.value })} />
-          <TextArea label="Anything they mentioned wanting to do next time?" placeholder="She mentioned making pasta\u2026"
-            value={notes.next} onChange={e => setNotes({ ...notes, next: e.target.value })} />
-          <TextArea label="Any concerns or observations?" placeholder="No concerns today\u2026"
-            value={notes.concern} onChange={e => setNotes({ ...notes, concern: e.target.value })} />
+        <h2 className="font-serif text-2xl font-semibold mb-1 m-0">
+          Log Visit with {senior?.name.split(" ")[0]}
+        </h2>
+        <p className="text-sm text-muted mb-7 m-0">
+          {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+        </p>
+
+        <div className="flex flex-col gap-6">
+
+          {/* ── Mood: How did they arrive? ── */}
           <div>
-            <label className="block text-sm font-medium text-dark mb-2">Mood: start → end</label>
-            <div className="flex gap-3 items-center text-2xl">
-              <span>{"\uD83D\uDE10"}</span>
-              <span className="text-sm text-muted">→</span>
-              <span>{"\uD83D\uDE0A"}</span>
+            <p className="text-sm font-semibold text-dark mb-3 m-0">
+              How was {senior?.name.split(" ")[0]}'s mood at the <em>start</em> of the visit?
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              {moodOptions.map(m => (
+                <button
+                  key={m.value}
+                  onClick={() => setMoodStart(m.value)}
+                  className={`flex flex-col items-center gap-1 px-4 py-3 rounded-xl border-2 cursor-pointer transition-all font-sans min-w-[72px] ${
+                    moodStart === m.value ? m.color : inactiveMood
+                  }`}
+                >
+                  <span className="text-xl">{m.emoji}</span>
+                  <span className="text-[11px] font-semibold">{m.label}</span>
+                </button>
+              ))}
             </div>
           </div>
-          <Button variant="blue" size="lg" onClick={() => setSubmitted(true)} className="mt-2">
+
+          {/* ── Mood: How did they leave? ── */}
+          <div>
+            <p className="text-sm font-semibold text-dark mb-3 m-0">
+              How was {senior?.name.split(" ")[0]}'s mood at the <em>end</em>?
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              {moodOptions.map(m => (
+                <button
+                  key={m.value}
+                  onClick={() => setMoodEnd(m.value)}
+                  className={`flex flex-col items-center gap-1 px-4 py-3 rounded-xl border-2 cursor-pointer transition-all font-sans min-w-[72px] ${
+                    moodEnd === m.value ? m.color : inactiveMood
+                  }`}
+                >
+                  <span className="text-xl">{m.emoji}</span>
+                  <span className="text-[11px] font-semibold">{m.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Activities ── */}
+          <div>
+            <p className="text-sm font-semibold text-dark mb-3 m-0">What did you do together? <span className="text-muted font-normal">(select all that apply)</span></p>
+            <div className="flex flex-wrap gap-2">
+              {visitActivities.map(a => (
+                <button
+                  key={a}
+                  onClick={() => toggleActivity(a)}
+                  className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium border cursor-pointer transition-all font-sans ${
+                    selectedActivities.includes(a)
+                      ? "bg-blue text-white border-blue shadow-sm"
+                      : "bg-warm-white text-mid border-border hover:bg-bg"
+                  }`}
+                >
+                  {selectedActivities.includes(a) && <Check size={10} className="inline mr-1" />}
+                  {a}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Highlight ── */}
+          <TextArea
+            label="What was the highlight of the visit?"
+            placeholder={`e.g. ${senior?.name.split(" ")[0]} sang along to a song they hadn't recalled in months…`}
+            value={notes.highlight}
+            onChange={e => setNotes({ ...notes, highlight: e.target.value })}
+          />
+
+          {/* ── Conversation ── */}
+          <TextArea
+            label="What did you talk about?"
+            placeholder="Stories shared, topics that came up, memories they recalled…"
+            value={notes.talked}
+            onChange={e => setNotes({ ...notes, talked: e.target.value })}
+          />
+
+          {/* ── Memories ── */}
+          <TextArea
+            label="Any vivid memories or stories they shared?"
+            placeholder="Specific people, places, or events they described in detail…"
+            value={notes.memories}
+            onChange={e => setNotes({ ...notes, memories: e.target.value })}
+          />
+
+          {/* ── Next time ── */}
+          <TextArea
+            label="Anything they mentioned wanting to do next time?"
+            placeholder="Ideas, wishes, or things they're looking forward to…"
+            value={notes.nextTime}
+            onChange={e => setNotes({ ...notes, nextTime: e.target.value })}
+          />
+
+          {/* ── Concerns ── */}
+          <TextArea
+            label="Any concerns or health observations?"
+            placeholder="Physical wellbeing, energy level, any worrying changes… (or 'None')"
+            value={notes.concern}
+            onChange={e => setNotes({ ...notes, concern: e.target.value })}
+          />
+
+          <Button
+            variant="blue"
+            size="lg"
+            disabled={!moodEnd}
+            onClick={() => {
+              // Save to localStorage so Family portal can read it
+              const visitRecord = {
+                seniorId: loggingFor,
+                seniorName: senior?.name.split(" ")[0],
+                date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+                moodStart,
+                moodEnd,
+                activities: selectedActivities,
+                notes,
+              };
+              localStorage.setItem("juni_latest_visit", JSON.stringify(visitRecord));
+              setSubmitted(true);
+            }}
+            className="mt-2"
+          >
             <Send size={16} /> Submit Visit Notes
           </Button>
+          {!moodEnd && (
+            <p className="text-xs text-muted text-center -mt-3 m-0">Select an end mood to submit</p>
+          )}
         </div>
       </PageWrapper>
     );
@@ -134,7 +302,7 @@ export default function CompanionPortal() {
     <PageWrapper className="max-w-5xl mx-auto px-6 pt-6 pb-16">
       {/* Welcome card */}
       <motion.div initial="hidden" animate="visible" variants={fadeUp}>
-        <Card className="mb-6">
+        <Card className="mb-4">
           <div className="flex justify-between items-center flex-wrap gap-5">
             <div className="flex items-center gap-4">
               <Avatar initials="SC" size="lg" color="blue" className="!font-sans" />
@@ -154,6 +322,20 @@ export default function CompanionPortal() {
           </div>
         </Card>
       </motion.div>
+
+      {/* Quick actions */}
+      <div className="flex gap-2 mb-6">
+        {[
+          { label: "Schedule", icon: Calendar, action: () => setView("schedule") },
+          { label: "Earnings", icon: CreditCard, action: () => setView("billing") },
+        ].map(({ label, icon: Icon, action }) => (
+          <button key={label} onClick={action}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-warm-white text-xs font-medium text-mid hover:bg-bg hover:text-dark transition-all cursor-pointer font-sans">
+            <Icon size={13} />
+            {label}
+          </button>
+        ))}
+      </div>
 
       <TabNav tabs={tabs} active={tab} onChange={setTab} />
 
@@ -191,11 +373,13 @@ export default function CompanionPortal() {
                       <p className="text-xl font-bold text-sage mt-0.5 m-0">{s.kindred}</p>
                     </div>
                     <Badge variant={moodColors[s.mood] || "sage"}>{s.mood}</Badge>
-                    {s.id === 1 && (
-                      <Button variant="blue" size="sm" onClick={(e) => { e.stopPropagation(); setLogging(true); }}>
-                        <Clock size={12} /> Log Visit
-                      </Button>
-                    )}
+                    <Button
+                      variant="blue"
+                      size="sm"
+                      onClick={(e) => { e.stopPropagation(); setLoggingFor(s.id); }}
+                    >
+                      <Clock size={12} /> Log Visit
+                    </Button>
                   </div>
                 </div>
 
@@ -282,11 +466,20 @@ export default function CompanionPortal() {
         <motion.div initial="hidden" animate="visible" variants={fadeUp} className="flex flex-col gap-4">
           <Card className="!bg-blue-bg !border-blue/20">
             <textarea
+              value={postText}
+              onChange={e => setPostText(e.target.value)}
               placeholder="Share a moment, ask a question, or celebrate a win\u2026"
               className="w-full min-h-[60px] p-0 border-none bg-transparent font-sans text-sm leading-relaxed text-dark resize-none outline-none placeholder:text-blue/40"
             />
             <div className="flex justify-end mt-2">
-              <Button variant="blue" size="sm"><Send size={12} /> Post</Button>
+              <Button
+                variant="blue"
+                size="sm"
+                disabled={!postText.trim()}
+                onClick={() => setPostText("")}
+              >
+                <Send size={12} /> Post
+              </Button>
             </div>
           </Card>
           {posts.map(p => (

@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Flower2, BarChart3, BookOpen, Bell, User, Calendar, CreditCard, Mic, Pencil,
   Camera, Lightbulb, TrendingUp, Brain, Sparkles, ShieldAlert, ArrowUpRight,
-  ArrowDownRight, Minus, AlertTriangle, Heart, Activity,
+  ArrowDownRight, Minus, AlertTriangle, Heart, Activity, MessageCircle, ClipboardList,
 } from "lucide-react";
 import { Card, TabNav, Badge, Avatar, SentimentArc, VitalsChart, Stat, ProgressBar } from "../ui";
 import PageWrapper from "../layout/PageWrapper";
@@ -12,6 +12,7 @@ import { seniorData, bloom, vitals, legacy, alertsData, partners, MONTHS } from 
 import FamilyProfile from "./FamilyProfile";
 import FamilySchedule from "./FamilySchedule";
 import FamilyBilling from "./FamilyBilling";
+import FamilyFeedback from "./FamilyFeedback";
 
 const legacyIcons = { audio: Mic, story: Pencil, photo: Camera, lesson: Lightbulb };
 
@@ -72,15 +73,32 @@ const vitalsMeta = [
   { k: "mood", l: "Mood", c: "purple", d: vitals.mood, latest: latestMood, prev: vitals.mood[vitals.mood.length - 2], weight: "30%" },
 ];
 
+const moodOptions = {
+  amazing: { emoji: "😄", label: "Amazing" },
+  good: { emoji: "😊", label: "Good" },
+  decent: { emoji: "🙂", label: "Decent" },
+  quiet: { emoji: "😐", label: "Quiet" },
+  difficult: { emoji: "😔", label: "Difficult" },
+};
+
 export default function FamilyPortal() {
   const [tab, setTab] = useState("bloom");
   const [expLeg, setExpLeg] = useState(null);
   const [view, setView] = useState("dash");
   const [expandedPrediction, setExpandedPrediction] = useState(0);
+  const [latestVisit, setLatestVisit] = useState(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("juni_latest_visit");
+    if (stored) {
+      try { setLatestVisit(JSON.parse(stored)); } catch (_) {}
+    }
+  }, []);
 
   if (view === "profile") return <FamilyProfile onBack={() => setView("dash")} />;
   if (view === "schedule") return <FamilySchedule onBack={() => setView("dash")} />;
   if (view === "billing") return <FamilyBilling onBack={() => setView("dash")} />;
+  if (view === "feedback") return <FamilyFeedback onBack={() => setView("dash")} />;
 
   return (
     <PageWrapper className="max-w-5xl mx-auto px-6 pt-6 pb-16">
@@ -119,11 +137,12 @@ export default function FamilyPortal() {
       </motion.div>
 
       {/* Quick actions */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 flex-wrap">
         {[
           { label: "Profile", icon: User, action: () => setView("profile") },
           { label: "Schedule", icon: Calendar, action: () => setView("schedule") },
           { label: "Billing", icon: CreditCard, action: () => setView("billing") },
+          { label: "Message", icon: MessageCircle, action: () => setView("feedback") },
         ].map(({ label, icon: Icon, action }) => (
           <button key={label} onClick={action}
             className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-warm-white text-xs font-medium text-mid hover:bg-bg hover:text-dark transition-all cursor-pointer font-sans">
@@ -167,6 +186,89 @@ export default function FamilyPortal() {
               ))}
             </div>
           </Card>
+
+          {/* Latest visit note from Companion */}
+          {latestVisit && (
+            <Card className="!border-sage/20 !bg-gradient-to-r !from-sage-bg/60 !to-transparent">
+              <div className="flex items-center gap-2 mb-4">
+                <ClipboardList size={17} className="text-sage" />
+                <h3 className="font-serif text-lg font-semibold m-0">Latest Visit Note</h3>
+                <Badge variant="sage" className="!text-[10px] ml-auto">From {seniorData.fellow}</Badge>
+                <span className="text-xs text-muted">{latestVisit.date}</span>
+              </div>
+
+              {/* Mood arc */}
+              {latestVisit.moodStart && latestVisit.moodEnd && (
+                <div className="flex items-center gap-3 mb-4 p-3 bg-warm-white rounded-xl border border-border w-fit">
+                  <span className="text-xl">{moodOptions[latestVisit.moodStart]?.emoji}</span>
+                  <span className="text-xs text-muted">arrived</span>
+                  <div className="flex gap-1">
+                    <div className="w-1 h-1 rounded-full bg-border" />
+                    <div className="w-1 h-1 rounded-full bg-border" />
+                    <div className="w-1 h-1 rounded-full bg-border" />
+                  </div>
+                  <span className="text-xs text-muted">left</span>
+                  <span className="text-xl">{moodOptions[latestVisit.moodEnd]?.emoji}</span>
+                  <span className="text-xs font-semibold text-dark">
+                    {moodOptions[latestVisit.moodEnd]?.label}
+                  </span>
+                </div>
+              )}
+
+              {/* Activities */}
+              {latestVisit.activities?.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  {latestVisit.activities.map((a, i) => (
+                    <span key={i} className="px-3 py-1 bg-bg rounded-full text-xs text-brown font-medium">{a}</span>
+                  ))}
+                </div>
+              )}
+
+              {/* Note highlights */}
+              <div className="flex flex-col gap-2">
+                {latestVisit.notes?.highlight && (
+                  <div className="flex gap-2.5 items-start">
+                    <div className="w-1.5 h-1.5 rounded-full bg-sage mt-1.5 shrink-0" />
+                    <p className="text-sm text-txt leading-relaxed m-0">
+                      <strong>Highlight:</strong> {latestVisit.notes.highlight}
+                    </p>
+                  </div>
+                )}
+                {latestVisit.notes?.talked && (
+                  <div className="flex gap-2.5 items-start">
+                    <div className="w-1.5 h-1.5 rounded-full bg-sage mt-1.5 shrink-0" />
+                    <p className="text-sm text-txt leading-relaxed m-0">
+                      <strong>Conversation:</strong> {latestVisit.notes.talked}
+                    </p>
+                  </div>
+                )}
+                {latestVisit.notes?.memories && (
+                  <div className="flex gap-2.5 items-start">
+                    <div className="w-1.5 h-1.5 rounded-full bg-sage mt-1.5 shrink-0" />
+                    <p className="text-sm text-txt leading-relaxed m-0">
+                      <strong>Memories shared:</strong> {latestVisit.notes.memories}
+                    </p>
+                  </div>
+                )}
+                {latestVisit.notes?.nextTime && (
+                  <div className="flex gap-2.5 items-start">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue mt-1.5 shrink-0" />
+                    <p className="text-sm text-txt leading-relaxed m-0">
+                      <strong>Next time:</strong> {latestVisit.notes.nextTime}
+                    </p>
+                  </div>
+                )}
+                {latestVisit.notes?.concern && latestVisit.notes.concern.toLowerCase() !== "none" && (
+                  <div className="flex gap-2.5 items-start">
+                    <div className="w-1.5 h-1.5 rounded-full bg-gold mt-1.5 shrink-0" />
+                    <p className="text-sm text-txt leading-relaxed m-0">
+                      <strong>Observation:</strong> {latestVisit.notes.concern}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </Card>
+          )}
 
           {/* AI Next-Visit Prediction */}
           <Card className="!border-blue/15 !bg-gradient-to-r !from-blue-bg/50 !to-transparent">
