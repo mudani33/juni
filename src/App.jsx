@@ -12,6 +12,7 @@ import PartnerPortal from "./components/partner/PartnerPortal";
 import EmployerLanding from "./components/employer/EmployerLanding";
 import EmployerPortal from "./components/employer/EmployerPortal";
 import StrictGate from "./components/onboarding/StrictGate";
+import AdminPortal from "./components/admin/AdminPortal";
 
 export default function JuniPlatform() {
   return (
@@ -31,6 +32,7 @@ export default function JuniPlatform() {
               <Route path="/partner" element={<PartnerPortal />} />
               <Route path="/employers" element={<EmployerLanding />} />
               <Route path="/employer" element={<EmployerPortal />} />
+              <Route path="/admin" element={<AdminPortal />} />
             </Routes>
           </AnimatePresence>
         </main>

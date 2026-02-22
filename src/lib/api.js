@@ -317,6 +317,43 @@ const api = {
       return objectKey;
     },
   },
+
+  // ── Admin ────────────────────────────────────────────────────────────────
+
+  admin: {
+    async getStats() {
+      return api.get("/admin/stats");
+    },
+    async getFamilies() {
+      return api.get("/admin/families");
+    },
+    async getCompanions(status) {
+      const qs = status ? `?status=${status}` : "";
+      return api.get(`/admin/companions${qs}`);
+    },
+    async updateCompanionStatus(id, status) {
+      return api.patch(`/admin/companions/${id}/status`, { status });
+    },
+    async getVisits(status, limit) {
+      const params = new URLSearchParams();
+      if (status) params.set("status", status);
+      if (limit) params.set("limit", String(limit));
+      const qs = params.toString() ? `?${params.toString()}` : "";
+      return api.get(`/admin/visits${qs}`);
+    },
+    async getInbox() {
+      return api.get("/admin/inbox");
+    },
+    async replyToMessage(id, reply) {
+      return api.post(`/admin/inbox/${id}/reply`, { reply });
+    },
+    async getPayouts() {
+      return api.get("/admin/payouts");
+    },
+    async runPayouts(periodStart, periodEnd) {
+      return api.post("/billing/payouts/run", { periodStart, periodEnd });
+    },
+  },
 };
 
 export default api;

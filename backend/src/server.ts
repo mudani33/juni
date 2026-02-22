@@ -17,6 +17,7 @@ import billingRoutes from "./routes/billing.routes.js";
 import messagesRoutes from "./routes/messages.routes.js";
 import checkrRoutes from "./routes/checkr.routes.js";
 import storageRoutes from "./routes/storage.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 
 // ── Webhook imports (raw body parsing required) ──────────────────────────────
 import stripeWebhook from "./webhooks/stripe.webhook.js";
@@ -118,6 +119,7 @@ app.get("/health", (_req, res) => {
 
 app.use("/api", apiLimiter);
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/families", familiesRoutes);
 app.use("/api/companions", companionsRoutes);
 app.use("/api/visits", visitsRoutes);
