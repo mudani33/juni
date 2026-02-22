@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -282,18 +282,189 @@ function HowItWorks({ navigate }) {
   );
 }
 
+// ── Interactive Two-Path cards ────────────────────────────────────────────────
+
+const checkVariants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: (i) => ({
+    opacity: 1, x: 0,
+    transition: { delay: i * 0.07, duration: 0.28, ease: "easeOut" },
+  }),
+};
+
+function PathCards({ navigate }) {
+  const [hovered, setHovered] = useState(null);
+
+  const cards = [
+    {
+      id: "family",
+      badge: "For Families",
+      badgeVariant: "sage",
+      title: "Find a Companion for Your Parent",
+      desc: "You can't always be there — but someone who truly gets them can. Take a 5-minute Vibe Check and we'll match your parent with a companion based on who they actually are.",
+      items: ["5-min Vibe Check about your parent", "See top Companion matches instantly", "Schedule a meet-and-greet", "Track social health after every visit"],
+      Icon: Heart,
+      iconCls: "text-sage",
+      iconBg: "bg-sage-bg",
+      glow: "rgba(140,190,150,0.13)",
+      borderHover: "rgba(120,175,135,0.45)",
+      shadowHover: "0 20px 56px rgba(100,165,115,0.13)",
+      cta: "Start the Vibe Check",
+      ctaVariant: "primary",
+      path: "/onboarding",
+      checkCls: "text-sage",
+      topBar: "from-sage to-sage-soft",
+    },
+    {
+      id: "companion",
+      badge: "For Companions",
+      badgeVariant: "blue",
+      title: "Become a Juni Companion",
+      desc: "This isn't a gig. Companions are trained individuals who build real relationships, preserve legacy, and get paid to make the world a little less lonely.",
+      items: ["$22–$35/hr with flexible scheduling", "Paid training in elder care & safety", "Background screened by Checkr", "Matched by personality & interests"],
+      Icon: Users,
+      iconCls: "text-blue",
+      iconBg: "bg-blue-bg",
+      glow: "rgba(90,140,210,0.11)",
+      borderHover: "rgba(80,130,200,0.4)",
+      shadowHover: "0 20px 56px rgba(70,120,190,0.12)",
+      cta: "Apply in 5 Minutes",
+      ctaVariant: "blue",
+      path: "/companion/signup",
+      checkCls: "text-blue",
+      topBar: "from-blue to-blue/60",
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      {cards.map((card, ci) => {
+        const { Icon } = card;
+        const isHov = hovered === card.id;
+        const isDimmed = hovered !== null && hovered !== card.id;
+        return (
+          <motion.div
+            key={card.id}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeUp}
+            custom={ci}
+            animate={{ opacity: isDimmed ? 0.52 : 1, scale: isHov ? 1.018 : isDimmed ? 0.985 : 1 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            onHoverStart={() => setHovered(card.id)}
+            onHoverEnd={() => setHovered(null)}
+            className="flex"
+          >
+            <div
+              className="relative flex flex-col w-full rounded-2xl bg-warm-white border overflow-hidden transition-colors duration-300"
+              style={{
+                borderColor: isHov ? card.borderHover : "var(--color-border, #e8e3dc)",
+                boxShadow: isHov ? card.shadowHover : "0 1px 4px rgba(0,0,0,0.04)",
+              }}
+            >
+              {/* Top accent bar */}
+              <div className={`absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r ${card.topBar}`} />
+
+              {/* Animated ambient glow */}
+              <motion.div
+                className="absolute inset-0 pointer-events-none rounded-2xl"
+                style={{ background: `radial-gradient(circle at 15% 15%, ${card.glow} 0%, transparent 65%)` }}
+                animate={{ opacity: isHov ? 1 : 0 }}
+                transition={{ duration: 0.35 }}
+              />
+
+              <div className="relative p-7 flex flex-col flex-1">
+                {/* Icon with pulse ring */}
+                <div className="relative w-14 h-14 mb-5 self-start">
+                  <motion.div
+                    className={`w-14 h-14 rounded-2xl ${card.iconBg} flex items-center justify-center`}
+                    animate={{ scale: isHov ? 1.08 : 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Icon className={card.iconCls} size={24} />
+                  </motion.div>
+                  <motion.div
+                    className="absolute inset-0 rounded-2xl border-2"
+                    style={{ borderColor: card.borderHover }}
+                    animate={{ scale: isHov ? 1.55 : 1.0, opacity: isHov ? 0 : 0 }}
+                    initial={{ scale: 1.0, opacity: 0 }}
+                    transition={{ duration: 0.7, repeat: isHov ? Infinity : 0, ease: "easeOut" }}
+                  />
+                </div>
+
+                <Badge variant={card.badgeVariant} className="mb-3 self-start">{card.badge}</Badge>
+                <h3 className="font-serif text-2xl font-semibold mb-2 text-dark">{card.title}</h3>
+                <p className="text-sm text-mid font-light leading-relaxed mb-5">{card.desc}</p>
+
+                <div className="flex flex-col gap-2.5 mb-7 flex-1">
+                  {card.items.map((item, i) => (
+                    <motion.div
+                      key={i}
+                      custom={i}
+                      variants={checkVariants}
+                      initial="hidden"
+                      whileInView="visible"
+                      viewport={{ once: true }}
+                      className="flex items-center gap-2.5 text-sm text-mid"
+                    >
+                      <motion.div
+                        animate={{ scale: isHov ? 1.2 : 1 }}
+                        transition={{ duration: 0.2, delay: i * 0.04 }}
+                      >
+                        <Check size={13} className={`${card.checkCls} shrink-0`} />
+                      </motion.div>
+                      <span className="font-light">{item}</span>
+                    </motion.div>
+                  ))}
+                </div>
+
+                <Button variant={card.ctaVariant} onClick={() => navigate(card.path)} className="w-full">
+                  {card.cta} <ArrowRight size={14} />
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════════ */
 
 export default function Landing() {
   const navigate = useNavigate();
+  const heroRef = useRef(null);
 
   return (
     <PageWrapper>
       {/* ══════════ Hero ══════════ */}
-      <section className="pt-24 pb-16 px-6 text-center max-w-3xl mx-auto">
+      <section ref={heroRef} className="relative pt-24 pb-14 px-6 text-center max-w-3xl mx-auto overflow-visible">
+
+        {/* Ambient blobs */}
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-visible">
+          <motion.div
+            className="absolute -top-28 -left-40 w-[480px] h-[480px] rounded-full"
+            style={{ background: "radial-gradient(circle, rgba(180,215,188,0.32) 0%, transparent 68%)" }}
+            animate={{ scale: [1, 1.07, 1], rotate: [0, 6, 0] }}
+            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute -bottom-12 -right-28 w-[380px] h-[380px] rounded-full"
+            style={{ background: "radial-gradient(circle, rgba(200,185,155,0.22) 0%, transparent 68%)" }}
+            animate={{ scale: [1, 1.1, 1], rotate: [0, -7, 0] }}
+            transition={{ duration: 11, repeat: Infinity, ease: "easeInOut", delay: 2.5 }}
+          />
+        </div>
+
+        {/* Badge with live pulse */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-          <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-sage-bg text-sage text-sm font-semibold mb-8">
-            <Sparkles size={14} />
+          <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-sage-bg text-sage text-sm font-semibold mb-8">
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sage opacity-55" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-sage" />
+            </span>
             Social Health, Beautifully Measured
           </div>
         </motion.div>
@@ -316,78 +487,48 @@ export default function Landing() {
           story — then tracks their social well-being so families can see the difference.
         </motion.p>
 
+        {/* CTA buttons */}
         <motion.div
           initial="hidden" animate="visible" variants={fadeUp} custom={3}
-          className="flex gap-3 justify-center flex-wrap"
+          className="flex gap-3 justify-center flex-wrap mb-10"
         >
           <Button size="lg" onClick={() => navigate("/onboarding")}>
             <Heart size={16} />
-            Find a Companion for Your Parent
+            Find a Companion
           </Button>
           <Button variant="dark" size="lg" onClick={() => navigate("/companion/signup")}>
             <Users size={16} />
             Become a Companion
           </Button>
         </motion.div>
+
+        {/* Social proof strip */}
+        <motion.div
+          initial="hidden" animate="visible" variants={fadeUp} custom={4}
+          className="flex items-center justify-center gap-3 flex-wrap"
+        >
+          <div className="flex -space-x-2.5">
+            <div className="w-8 h-8 rounded-full border-2 border-cream bg-sage-bg flex items-center justify-center text-[10px] font-bold text-sage">RR</div>
+            <div className="w-8 h-8 rounded-full border-2 border-cream bg-gold-bg flex items-center justify-center text-[10px] font-bold text-gold">JW</div>
+            <div className="w-8 h-8 rounded-full border-2 border-cream bg-blue-bg flex items-center justify-center text-[10px] font-bold text-blue">KP</div>
+            <div className="w-8 h-8 rounded-full border-2 border-cream bg-sage-bg flex items-center justify-center text-[10px] font-bold text-sage">SM</div>
+            <div className="w-8 h-8 rounded-full border-2 border-cream bg-gold-bg flex items-center justify-center text-[10px] font-bold text-gold">AL</div>
+          </div>
+          <span className="text-sm text-dark font-semibold">1,200+ families</span>
+          <span className="text-sm text-muted font-light">matched with a companion</span>
+          <span className="text-faint text-sm">·</span>
+          <span className="flex items-center gap-1 text-sm text-mid">
+            <Star size={12} className="text-gold" style={{ fill: "currentColor" }} />
+            4.9
+          </span>
+          <span className="text-faint text-sm">·</span>
+          <span className="text-sm text-mid font-light">&lt;48hr first match</span>
+        </motion.div>
       </section>
 
       {/* ══════════ Two Paths ══════════ */}
       <section className="max-w-5xl mx-auto px-6 pb-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Family Path */}
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <Card hover className="h-full relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sage to-sage-soft" />
-              <div className="w-12 h-12 rounded-xl bg-sage-bg flex items-center justify-center mb-5 mt-2">
-                <Heart className="text-sage" size={22} />
-              </div>
-              <Badge variant="sage" className="mb-3">For Families</Badge>
-              <h3 className="font-serif text-2xl font-semibold mb-2">Find a Companion for Your Parent</h3>
-              <p className="text-sm text-mid font-light leading-relaxed mb-5">
-                You can't always be there — but someone who truly gets them can. Take a 5-minute Vibe
-                Check and we'll match your parent with a companion based on who they actually are.
-              </p>
-              <div className="flex flex-col gap-2 mb-6">
-                {["5-min Vibe Check about your parent", "See top Companion matches instantly", "Schedule a meet-and-greet", "Track social health after every visit"].map((item, i) => (
-                  <div key={i} className="flex items-center gap-2 text-sm text-mid">
-                    <Check size={13} className="text-sage shrink-0" />
-                    <span className="font-light">{item}</span>
-                  </div>
-                ))}
-              </div>
-              <Button onClick={() => navigate("/onboarding")} className="w-full">
-                Start the Vibe Check <ArrowRight size={14} />
-              </Button>
-            </Card>
-          </motion.div>
-
-          {/* Companion Path */}
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}>
-            <Card hover className="h-full relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue to-blue/70" />
-              <div className="w-12 h-12 rounded-xl bg-blue-bg flex items-center justify-center mb-5 mt-2">
-                <Users className="text-blue" size={22} />
-              </div>
-              <Badge variant="blue" className="mb-3">For Companions</Badge>
-              <h3 className="font-serif text-2xl font-semibold mb-2">Become a Juni Companion</h3>
-              <p className="text-sm text-mid font-light leading-relaxed mb-5">
-                This isn't a gig. Companions are trained individuals who build real relationships, preserve
-                legacy, and get paid to make the world a little less lonely.
-              </p>
-              <div className="flex flex-col gap-2 mb-6">
-                {["$22–$35/hr with flexible scheduling", "Paid training in elder care & safety", "Background screened by Checkr", "Matched by personality & interests"].map((item, i) => (
-                  <div key={i} className="flex items-center gap-2 text-sm text-mid">
-                    <Check size={13} className="text-blue shrink-0" />
-                    <span className="font-light">{item}</span>
-                  </div>
-                ))}
-              </div>
-              <Button variant="blue" onClick={() => navigate("/companion/signup")} className="w-full">
-                Apply in 5 Minutes <ArrowRight size={14} />
-              </Button>
-            </Card>
-          </motion.div>
-        </div>
+        <PathCards navigate={navigate} />
       </section>
 
       {/* ══════════ Pillars ══════════ */}
