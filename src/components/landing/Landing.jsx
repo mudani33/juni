@@ -284,14 +284,6 @@ function HowItWorks({ navigate }) {
 
 // ── Interactive Two-Path cards ────────────────────────────────────────────────
 
-const checkVariants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: (i) => ({
-    opacity: 1, x: 0,
-    transition: { delay: i * 0.07, duration: 0.28, ease: "easeOut" },
-  }),
-};
-
 function PathCards({ navigate }) {
   const [hovered, setHovered] = useState(null);
 
@@ -300,16 +292,15 @@ function PathCards({ navigate }) {
       id: "family",
       badge: "For Families",
       badgeVariant: "sage",
-      title: "Find a Companion for Your Parent",
-      desc: "You can't always be there — but someone who truly gets them can. Take a 5-minute Vibe Check and we'll match your parent with a companion based on who they actually are.",
-      items: ["5-min Vibe Check about your parent", "See top Companion matches instantly", "Schedule a meet-and-greet", "Track social health after every visit"],
+      title: "Find a Companion for Your Senior",
+      desc: "You can't always be there — but someone who truly gets them can. Take a 5-minute Vibe Check and we'll match your senior with a companion based on who they actually are.",
       Icon: Heart,
       iconCls: "text-sage",
       iconBg: "bg-sage-bg",
       glow: "rgba(140,190,150,0.13)",
       borderHover: "rgba(120,175,135,0.45)",
       shadowHover: "0 20px 56px rgba(100,165,115,0.13)",
-      cta: "Start the Vibe Check",
+      cta: "Start for free",
       ctaVariant: "primary",
       path: "/onboarding",
       checkCls: "text-sage",
@@ -321,7 +312,6 @@ function PathCards({ navigate }) {
       badgeVariant: "blue",
       title: "Become a Juni Companion",
       desc: "This isn't a gig. Companions are trained individuals who build real relationships, preserve legacy, and get paid to make the world a little less lonely.",
-      items: ["$22–$35/hr with flexible scheduling", "Paid training in elder care & safety", "Background screened by Checkr", "Matched by personality & interests"],
       Icon: Users,
       iconCls: "text-blue",
       iconBg: "bg-blue-bg",
@@ -395,29 +385,7 @@ function PathCards({ navigate }) {
 
                 <Badge variant={card.badgeVariant} className="mb-3 self-start">{card.badge}</Badge>
                 <h3 className="font-serif text-2xl font-semibold mb-2 text-dark">{card.title}</h3>
-                <p className="text-sm text-mid font-light leading-relaxed mb-5">{card.desc}</p>
-
-                <div className="flex flex-col gap-2.5 mb-7 flex-1">
-                  {card.items.map((item, i) => (
-                    <motion.div
-                      key={i}
-                      custom={i}
-                      variants={checkVariants}
-                      initial="hidden"
-                      whileInView="visible"
-                      viewport={{ once: true }}
-                      className="flex items-center gap-2.5 text-sm text-mid"
-                    >
-                      <motion.div
-                        animate={{ scale: isHov ? 1.2 : 1 }}
-                        transition={{ duration: 0.2, delay: i * 0.04 }}
-                      >
-                        <Check size={13} className={`${card.checkCls} shrink-0`} />
-                      </motion.div>
-                      <span className="font-light">{item}</span>
-                    </motion.div>
-                  ))}
-                </div>
+                <p className="text-sm text-mid font-light leading-relaxed mb-7 flex-1">{card.desc}</p>
 
                 <Button variant={card.ctaVariant} onClick={() => navigate(card.path)} className="w-full">
                   {card.cta} <ArrowRight size={14} />
