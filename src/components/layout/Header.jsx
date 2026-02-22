@@ -1,8 +1,9 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Users, Heart, Handshake, Building2, Menu, X } from "lucide-react";
+import { Home, Users, Heart, Handshake, Building2, Menu, X, LogIn, LogOut, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { cn } from "../../lib/utils";
 import Avatar from "../ui/Avatar";
+import { userStore, tokenStore } from "../../lib/api";
 
 const navItems = [
   { path: "/", label: "Home", icon: Home },
@@ -17,6 +18,19 @@ export default function Header() {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const user = userStore.get();
+  const isLoggedIn = !!user;
+
+  const handleLogout = async () => {
+    try {
+      const { default: api } = await import("../../lib/api");
+      await api.auth.logout();
+    } finally {
+      tokenStore.clear();
+      navigate("/login", { replace: true });
+    }
+  };
+
   const portalMeta = {
     "/family/signup": { label: "Family Sign Up", color: "text-sage" },
     "/family": { label: "Family Portal", color: "text-sage" },
@@ -26,10 +40,13 @@ export default function Header() {
     "/partner": { label: "Trust Partner Portal", color: "text-amber" },
     "/employer": { label: "Employer Portal", color: "text-purple" },
     "/onboarding": { label: "Vibe Check", color: "text-sage" },
+    "/admin": { label: "Admin Portal", color: "text-purple" },
   };
 
   const currentMeta = Object.entries(portalMeta).find(([k]) => location.pathname.startsWith(k));
-  const avatarInitials = location.pathname.startsWith("/companion") ? "SC"
+  const avatarInitials = user
+    ? (user.email?.[0] ?? "?").toUpperCase()
+    : location.pathname.startsWith("/companion") ? "SC"
     : location.pathname.startsWith("/partner") ? "MW"
     : location.pathname.startsWith("/employer") ? "RT" : "LR";
 
@@ -69,13 +86,53 @@ export default function Header() {
         </nav>
 
         {/* Right side */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {currentMeta && (
-            <span className={cn("text-xs font-medium hidden lg:inline", currentMeta[1].color)}>
+            <span className={cn("text-xs font-medium hidden lg:inline mr-1", currentMeta[1].color)}>
               {currentMeta[1].label}
             </span>
           )}
-          <Avatar initials={avatarInitials} size="sm" color="bg" />
+
+          {isLoggedIn ? (
+            <div className="flex items-center gap-2">
+              {user.role === "ADMIN" && (
+                <Link
+                  to="/admin"
+                  className={cn(
+                    "hidden sm:flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors no-underline",
+                    location.pathname.startsWith("/admin")
+                      ? "bg-purple-bg text-purple"
+                      : "text-muted hover:text-purple hover:bg-purple-bg",
+                  )}
+                >
+                  <ShieldCheck size={13} />
+                  Admin
+                </Link>
+              )}
+              <Avatar initials={avatarInitials} size="sm" color={user.role === "ADMIN" ? "purple" : "bg"} />
+              <button
+                onClick={handleLogout}
+                title="Sign out"
+                className="flex items-center gap-1 text-xs text-muted hover:text-danger transition-colors border-none bg-transparent cursor-pointer p-1.5 rounded-lg hover:bg-danger-bg"
+              >
+                <LogOut size={14} />
+                <span className="hidden sm:inline">Sign out</span>
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className={cn(
+                "flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-lg transition-all no-underline",
+                location.pathname === "/login"
+                  ? "bg-sage text-white"
+                  : "bg-sage-bg text-sage hover:bg-sage hover:text-white",
+              )}
+            >
+              <LogIn size={13} />
+              Sign in
+            </Link>
+          )}
 
           {/* Mobile menu button */}
           <button
@@ -112,6 +169,26 @@ export default function Header() {
                 </Link>
               );
             })}
+            <div className="border-t border-border mt-1 pt-1">
+              {isLoggedIn ? (
+                <button
+                  onClick={() => { setMobileOpen(false); handleLogout(); }}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-mid hover:bg-danger-bg hover:text-danger transition-all w-full text-left font-sans border-none bg-transparent cursor-pointer"
+                >
+                  <LogOut size={18} />
+                  Sign out
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-sage font-semibold hover:bg-sage-bg transition-all no-underline"
+                >
+                  <LogIn size={18} />
+                  Sign in
+                </Link>
+              )}
+            </div>
           </nav>
         </div>
       )}
