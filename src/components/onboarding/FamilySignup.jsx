@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import api, { ApiError } from "../../lib/api";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -111,23 +112,33 @@ export default function FamilySignup() {
     return errs;
   };
 
-  const handleSubmit = () => {
+  const [submitting, setSubmitting] = useState(false);
+  const [apiError, setApiError] = useState("");
+
+  const handleSubmit = async () => {
     const errs = validate();
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       return;
     }
-    // Save family account info
-    localStorage.setItem(
-      "juni_family_account",
-      JSON.stringify({
-        ...form,
-        password: undefined,
+    setSubmitting(true);
+    setApiError("");
+    try {
+      await api.auth.registerFamily({
+        email: form.email,
+        password: form.password,
+        firstName: form.firstName,
+        lastName: form.lastName,
+        phone: form.phone || undefined,
+        howHeard: form.howHeard || undefined,
         parentName,
-        createdAt: new Date().toISOString(),
-      }),
-    );
-    setSubmitted(true);
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setApiError(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   /* ───── Success / Redirect Screen ───── */
@@ -456,10 +467,15 @@ export default function FamilySignup() {
                 )}
               </div>
 
+              {/* API error */}
+              {apiError && (
+                <p className="text-xs text-danger text-center m-0">{apiError}</p>
+              )}
+
               {/* Submit */}
-              <Button size="lg" className="w-full mt-2" onClick={handleSubmit}>
-                Create Account & View Matches
-                <ArrowRight size={16} />
+              <Button size="lg" className="w-full mt-2" onClick={handleSubmit} disabled={submitting}>
+                {submitting ? "Creating Account…" : "Create Account & View Matches"}
+                {!submitting && <ArrowRight size={16} />}
               </Button>
 
               <div className="flex items-center justify-center gap-2 text-xs text-muted">

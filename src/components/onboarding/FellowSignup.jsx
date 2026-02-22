@@ -11,7 +11,7 @@ import Card from "../ui/Card";
 import Badge from "../ui/Badge";
 import { Input, TextArea, Select } from "../ui/Input";
 import PageWrapper from "../layout/PageWrapper";
-import useCheckrOnboarding from "../../hooks/useCheckrOnboarding";
+import api, { ApiError } from "../../lib/api";
 
 const stepVariants = {
   enter: { opacity: 0, x: 40 },
@@ -21,7 +21,7 @@ const stepVariants = {
 
 export default function CompanionSignup() {
   const navigate = useNavigate();
-  const { initiateBackgroundCheck, checkrStatus, error: checkrError } = useCheckrOnboarding();
+  const [apiError, setApiError] = useState("");
   const [step, setStep] = useState(0); // 0: welcome, 1: personal, 2: about, 3: submit/confirm
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -54,24 +54,27 @@ export default function CompanionSignup() {
 
   const handleSubmit = async () => {
     setSubmitting(true);
+    setApiError("");
     try {
-      // Create Checkr candidate and initiate invitation
-      await initiateBackgroundCheck({
+      await api.auth.registerCompanion({
+        email: form.email,
         firstName: form.firstName,
         lastName: form.lastName,
-        email: form.email,
-        phone: form.phone,
-        dob: form.dob,
-        zipcode: form.zipcode,
+        phone: form.phone || undefined,
+        dob: form.dob || undefined,
+        zipcode: form.zipcode || undefined,
+        city: form.city || undefined,
+        state: form.state || undefined,
+        motivation: form.motivation || undefined,
+        experience: form.experience || undefined,
+        availability: form.availability || undefined,
+        interests: form.interests,
+        hearAbout: form.hearAbout || undefined,
       });
       setSubmitted(true);
       setStep(3);
-    } catch {
-      // In prototype mode, still proceed (Checkr proxy doesn't exist yet)
-      // Store application data in localStorage for the onboarding flow
-      localStorage.setItem("juni_fellow_application", JSON.stringify(form));
-      setSubmitted(true);
-      setStep(3);
+    } catch (err) {
+      setApiError(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -423,13 +426,11 @@ export default function CompanionSignup() {
         )}
       </div>
 
-      {checkrError && (
+      {apiError && (
         <div className="mt-4 p-3 rounded-xl bg-gold-bg border border-gold/20">
           <div className="flex items-start gap-2">
             <AlertTriangle size={14} className="text-gold shrink-0 mt-0.5" />
-            <p className="text-xs text-mid m-0">
-              Background check service is currently in demo mode. Your application has been saved and you can proceed to the screening flow.
-            </p>
+            <p className="text-xs text-mid m-0">{apiError}</p>
           </div>
         </div>
       )}

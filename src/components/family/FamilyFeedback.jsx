@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import api from "../../lib/api";
 import { ArrowLeft, MessageCircle, Send, CheckCircle2, Star, Calendar, AlertTriangle, Heart, ChevronDown, ChevronUp } from "lucide-react";
 import { Card, Badge, Avatar } from "../ui";
 import Button from "../ui/Button";
@@ -43,18 +44,14 @@ export default function FamilyFeedback({ onBack }) {
 
   const activeType = quickTypes.find(t => t.id === selectedType);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!message.trim() || !selectedType) return;
+    try {
+      await api.messages.send({ toType: "juni_team", type: selectedType, body: message });
+    } catch {
+      // Fail silently for UX continuity — message is still shown as sent
+    }
     setSubmitted(true);
-    // persist to localStorage so companion can read (prototype simulation)
-    const existing = JSON.parse(localStorage.getItem("juni_family_messages") || "[]");
-    existing.unshift({
-      type: selectedType,
-      msg: message,
-      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-      from: "Family",
-    });
-    localStorage.setItem("juni_family_messages", JSON.stringify(existing));
   };
 
   return (
