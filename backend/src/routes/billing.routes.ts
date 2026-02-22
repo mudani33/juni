@@ -151,6 +151,9 @@ router.post(
     z.object({
       periodStart: z.string().datetime(),
       periodEnd: z.string().datetime(),
+    }).refine((d) => new Date(d.periodStart) < new Date(d.periodEnd), {
+      message: "periodStart must be before periodEnd",
+      path: ["periodStart"],
     }),
   ),
   async (req: Request, res: Response, next: NextFunction) => {

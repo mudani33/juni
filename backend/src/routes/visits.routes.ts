@@ -8,6 +8,8 @@ import { AIService } from "../services/ai.service.js";
 import { TwilioService } from "../services/twilio.service.js";
 import { EmailService } from "../services/email.service.js";
 import { VisitStatus } from "@prisma/client";
+import { env } from "../config/env.js";
+import { logger } from "../lib/logger.js";
 
 const router = Router();
 router.use(authenticate);
@@ -165,8 +167,10 @@ router.post(
         seniorConditions: visit.senior.conditions,
         familyEmail: visit.senior.family.user.email,
         familyFirstName: visit.senior.family.firstName,
-        portalUrl: `${process.env["FRONTEND_URL"]}/family`,
-      }).catch(() => {});
+        portalUrl: `${env.FRONTEND_URL}/family`,
+      }).catch((err: unknown) => {
+        logger.error("Failed to generate Bloom digest after visit completion", { visitId: visit.id, error: err });
+      });
 
       res.json({ message: "Visit completed", actualMinutes });
     } catch (err) {
@@ -184,11 +188,24 @@ router.post(
   validateBody(z.object({ reason: z.string().max(500).optional() })),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const visit = await prisma.visit.findUnique({ where: { id: req.params["id"] as string } });
+      const visit = await prisma.visit.findUnique({
+        where: { id: req.params["id"] as string },
+        include: { senior: { include: { family: true } }, companion: true },
+      });
       if (!visit) throw new NotFoundError("Visit");
 
       if (visit.status === VisitStatus.COMPLETED || visit.status === VisitStatus.CANCELLED) {
         throw new BadRequestError("Visit cannot be cancelled in its current state");
+      }
+
+      // Authorisation: only the owning family, the assigned companion, or an admin may cancel
+      const userId = req.user!.sub;
+      const role = req.user!.role;
+      const isFamilyOwner = visit.senior.family.userId === userId;
+      const isAssignedCompanion = visit.companion?.userId === userId;
+      const isAdmin = role === "ADMIN";
+      if (!isFamilyOwner && !isAssignedCompanion && !isAdmin) {
+        throw new ForbiddenError("You are not authorised to cancel this visit");
       }
 
       const { reason } = req.body as { reason?: string };
@@ -197,7 +214,7 @@ router.post(
         data: {
           status: VisitStatus.CANCELLED,
           cancelledAt: new Date(),
-          cancelledBy: req.user!.sub,
+          cancelledBy: userId,
           cancellationReason: reason,
         },
       });

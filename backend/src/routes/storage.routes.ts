@@ -109,6 +109,9 @@ async function verifyObjectOwnership(
 ): Promise<boolean> {
   if (role === "ADMIN") return true;
 
+  // Guard against path traversal attacks
+  if (objectKey.includes("..") || objectKey.includes("\0")) return false;
+
   const parts = objectKey.split("/");
   const ownerType = parts[0]; // "companion" | "senior" | "user"
   const ownerId = parts[1];

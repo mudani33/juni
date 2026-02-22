@@ -49,11 +49,17 @@ app.use(
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, Postman) in dev
-      if (!origin || env.NODE_ENV === "development") {
-        return callback(null, true);
+      // Allow requests with no origin only for webhook paths (handled by separate middleware)
+      // For all other requests, enforce origin allowlist
+      if (!origin) {
+        // No origin = native app / curl / server-to-server; reject for browser-facing API
+        return callback(null, false);
       }
       if (origin === env.FRONTEND_URL) {
+        return callback(null, true);
+      }
+      // In dev, also allow localhost variants of the frontend
+      if (env.NODE_ENV === "development" && /^https?:\/\/localhost(:\d+)?$/.test(origin)) {
         return callback(null, true);
       }
       callback(new Error(`CORS: origin '${origin}' not allowed`));

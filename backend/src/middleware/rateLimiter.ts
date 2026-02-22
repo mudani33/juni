@@ -23,7 +23,7 @@ export const apiLimiter = rateLimit({
   standardHeaders: "draft-7",
   legacyHeaders: false,
   message: { error: "Too many requests, please try again later", code: "RATE_LIMITED" },
-  skipSuccessfulRequests: true,
+  skipSuccessfulRequests: false,
 });
 
 /**

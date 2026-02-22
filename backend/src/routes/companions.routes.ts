@@ -8,6 +8,7 @@ import { CheckrService } from "../services/checkr.service.js";
 import { StripeService } from "../services/stripe.service.js";
 import { AIService } from "../services/ai.service.js";
 import { CompanionStatus } from "@prisma/client";
+import { env } from "../config/env.js";
 
 const router = Router();
 router.use(authenticate);
@@ -315,8 +316,8 @@ router.post(
 
       const onboardingUrl = await StripeService.createConnectAccountLink({
         accountId,
-        refreshUrl: `${process.env["FRONTEND_URL"]}/companion?stripe=refresh`,
-        returnUrl: `${process.env["FRONTEND_URL"]}/companion?stripe=complete`,
+        refreshUrl: `${env.FRONTEND_URL}/companion?stripe=refresh`,
+        returnUrl: `${env.FRONTEND_URL}/companion?stripe=complete`,
       });
 
       res.json({ onboardingUrl });
