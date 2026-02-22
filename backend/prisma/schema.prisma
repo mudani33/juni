@@ -1,0 +1,411 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  FAMILY
+  COMPANION
+  ADMIN
+}
+
+enum CompanionStatus {
+  APPLIED
+  SCREENING
+  TRAINING
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+}
+
+enum CheckrStatus {
+  PENDING
+  IN_PROGRESS
+  PASSED
+  FAILED
+  WAIVER_REQUIRED
+}
+
+enum MatchStatus {
+  PROPOSED
+  ACCEPTED
+  REJECTED
+  ACTIVE
+  ENDED
+}
+
+enum VisitStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum PlanName {
+  ESSENTIALS
+  PREMIUM
+  LEGACY
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+}
+
+// ─── Core User ───────────────────────────────────────────────────────────────
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  passwordHash      String
+  role              UserRole
+  emailVerified     Boolean   @default(false)
+  emailVerifiedAt   DateTime?
+
+  // Email verification token (hashed)
+  emailVerifyToken    String?
+  emailVerifyExpires  DateTime?
+
+  // Password reset token (hashed)
+  passwordResetToken    String?
+  passwordResetExpires  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  family         FamilyAccount?
+  companion      CompanionAccount?
+  refreshTokens  RefreshToken[]
+  sentMessages   Message[]          @relation("MessageFrom")
+
+  @@index([email])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  jti       String   @unique  // JWT ID — used to revoke specific tokens
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([jti])
+}
+
+// ─── Family ──────────────────────────────────────────────────────────────────
+
+model FamilyAccount {
+  id        String @id @default(cuid())
+  userId    String @unique
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  firstName String
+  lastName  String
+  phone     String?
+  howHeard  String?
+
+  // Stripe customer ID for billing
+  stripeCustomerId String? @unique
+
+  seniors       Senior[]
+  subscriptions Subscription[]
+  messages      Message[]       @relation("MessageToFamily")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Senior {
+  id       String        @id @default(cuid())
+  familyId String
+  family   FamilyAccount @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  // Basic info
+  firstName       String
+  nickname        String?
+  age             Int?
+  relationship    String?
+  livingSituation String?
+  location        String?
+  languages       String[]
+
+  // Vibe check — personality + interests
+  personality    Json?     // { Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism }
+  interests      String[]
+  socialStyle    String[]
+  eraPreference  Int?      // index into era options
+  conditions     String[]  // health + mobility considerations
+
+  // Visit preferences
+  visitTimes     String?
+  visitFrequency String?
+  visitLength    String?
+
+  // Emotional context
+  lifeChanges        String[]
+  bringsJoy          String?
+  struggles          String?
+  sensitiveTopics    String?
+
+  // Goals + legacy
+  goals              String[]
+  wish               String?
+  legacyStory        String?
+
+  // Companion preferences
+  companionQualities String[]
+  genderPref         String?
+  agePref            String?
+  anythingElse       String?
+
+  // Active companion
+  companionId String?
+  companion   CompanionAccount? @relation("SeniorCompanion", fields: [companionId], references: [id])
+
+  visits  Visit[]
+  matches Match[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([familyId])
+}
+
+// ─── Companion ───────────────────────────────────────────────────────────────
+
+model CompanionAccount {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  firstName String
+  lastName  String
+  phone     String?
+  dob       DateTime?
+  zipcode   String?
+  city      String?
+  state     String?
+
+  // Application
+  motivation  String?
+  experience  String?
+  availability String?
+  interests   String[]
+  hearAbout   String?
+
+  // Background check
+  checkrCandidateId  String?
+  checkrInvitationId String?
+  checkrReportId     String?
+  checkrStatus       CheckrStatus @default(PENDING)
+  bgCheckResults     Json?        // Full mapped results from Checkr
+
+  // Drug screen
+  drugScreenScheduledAt DateTime?
+  drugScreenLabLocation String?
+  drugScreenCompletedAt DateTime?
+
+  // Training progress (completion percentages per module)
+  trainingProgress Json? // { empathetic_comm: 100, dementia_awareness: 72, ... }
+
+  // Status
+  status CompanionStatus @default(APPLIED)
+
+  // Stripe Connect — for payouts
+  stripeAccountId        String?  // Express account ID
+  stripeAccountStatus    String?  // pending | active | restricted
+
+  seniors  Senior[]         @relation("SeniorCompanion")
+  visits   Visit[]
+  matches  Match[]
+  payouts  Payout[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([checkrStatus])
+}
+
+// ─── Matching ────────────────────────────────────────────────────────────────
+
+model Match {
+  id          String          @id @default(cuid())
+  seniorId    String
+  senior      Senior          @relation(fields: [seniorId], references: [id], onDelete: Cascade)
+  companionId String
+  companion   CompanionAccount @relation(fields: [companionId], references: [id], onDelete: Cascade)
+
+  kindredScore  Float          // 0–100
+  matchReasons  String[]
+  status        MatchStatus    @default(PROPOSED)
+
+  proposedAt  DateTime  @default(now())
+  acceptedAt  DateTime?
+  rejectedAt  DateTime?
+  endedAt     DateTime?
+
+  @@unique([seniorId, companionId])
+  @@index([seniorId])
+  @@index([companionId])
+}
+
+// ─── Visits ──────────────────────────────────────────────────────────────────
+
+model Visit {
+  id          String          @id @default(cuid())
+  seniorId    String
+  senior      Senior          @relation(fields: [seniorId], references: [id], onDelete: Cascade)
+  companionId String
+  companion   CompanionAccount @relation(fields: [companionId], references: [id], onDelete: Cascade)
+
+  scheduledAt DateTime
+  durationMin Int             // planned duration in minutes
+  visitType   String          // Regular visit | Legacy recording | Outdoor activity | Medical accompaniment
+  status      VisitStatus     @default(SCHEDULED)
+
+  // GPS check-in
+  checkInAt  DateTime?
+  checkInLat Float?
+  checkInLng Float?
+
+  // GPS check-out
+  checkOutAt  DateTime?
+  checkOutLat Float?
+  checkOutLng Float?
+  actualMinutes Int?          // actual duration from checkin/checkout
+
+  // Visit notes (companion submitted)
+  mood        String?
+  activities  String[]
+  notes       String?
+
+  // AI-generated Daily Bloom
+  bloom       Json?           // { sentiment, mood, summary, highlights, topics }
+  bloomGeneratedAt DateTime?
+
+  // Billing
+  billedHours  Float?
+  payoutId     String?
+  payout       Payout?        @relation(fields: [payoutId], references: [id])
+
+  // Cancellation
+  cancelledAt     DateTime?
+  cancelledBy     String?     // userId
+  cancellationReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([seniorId])
+  @@index([companionId])
+  @@index([scheduledAt])
+  @@index([status])
+}
+
+// ─── Billing ─────────────────────────────────────────────────────────────────
+
+model Subscription {
+  id       String        @id @default(cuid())
+  familyId String
+  family   FamilyAccount @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  stripeCustomerId String
+  stripeSubId      String   @unique
+  plan             PlanName
+  status           String   // active | past_due | cancelled | trialing | incomplete
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([familyId])
+  @@index([stripeSubId])
+}
+
+model Payout {
+  id          String          @id @default(cuid())
+  companionId String
+  companion   CompanionAccount @relation(fields: [companionId], references: [id], onDelete: Cascade)
+
+  period       String   // human-readable e.g. "Feb 1–15, 2026"
+  periodStart  DateTime
+  periodEnd    DateTime
+
+  grossAmountCents   Int      // before platform fee
+  platformFeeCents   Int      // Juni 10% fee
+  netAmountCents     Int      // transferred to companion
+
+  visits          Visit[]
+
+  stripeTransferId String?
+  status           PayoutStatus @default(PENDING)
+  paidAt           DateTime?
+  failureReason    String?
+
+  createdAt DateTime @default(now())
+
+  @@index([companionId])
+  @@index([status])
+}
+
+// ─── Messaging ───────────────────────────────────────────────────────────────
+
+model Message {
+  id         String @id @default(cuid())
+  fromUserId String
+  from       User   @relation("MessageFrom", fields: [fromUserId], references: [id])
+
+  // Family-to-Juni or Family-to-Companion
+  familyId   String?
+  family     FamilyAccount? @relation("MessageToFamily", fields: [familyId], references: [id])
+
+  toType  String  // "juni_team" | "companion"
+  type    String  // "feedback" | "concern" | "schedule" | "request"
+  subject String?
+  body    String
+
+  readAt    DateTime?
+  reply     String?
+  repliedAt DateTime?
+  repliedBy String?  // userId of staff who replied
+
+  createdAt DateTime @default(now())
+
+  @@index([fromUserId])
+  @@index([familyId])
+}
+
+// ─── Twilio Proxy Sessions ────────────────────────────────────────────────────
+
+model TwilioProxySession {
+  id          String @id @default(cuid())
+  twilioSid   String @unique  // Twilio Session SID
+  seniorId    String
+  companionId String
+
+  familyProxiedNumber    String  // masked number shown to family
+  companionProxiedNumber String  // masked number shown to companion
+
+  status    String    // open | closed | failed
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([seniorId, companionId])
+}
