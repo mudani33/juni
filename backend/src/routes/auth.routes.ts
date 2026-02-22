@@ -7,6 +7,7 @@ import { authenticate } from "../middleware/auth.js";
 import { verifyRefreshToken } from "../lib/jwt.js";
 import prisma from "../db/client.js";
 import { AuthError } from "../middleware/errorHandler.js";
+import { env } from "../config/env.js";
 
 const router = Router();
 
@@ -115,7 +116,7 @@ router.post(
       // httpOnly cookie for refresh token
       res.cookie("refreshToken", tokens.refreshToken, {
         httpOnly: true,
-        secure: process.env["NODE_ENV"] === "production",
+        secure: env.NODE_ENV === "production",
         sameSite: "strict",
         maxAge: 30 * 24 * 60 * 60 * 1000,
         path: "/api/auth/refresh",
@@ -142,7 +143,7 @@ router.post("/refresh", async (req: Request, res: Response, next: NextFunction) 
 
     res.cookie("refreshToken", tokens.refreshToken, {
       httpOnly: true,
-      secure: process.env["NODE_ENV"] === "production",
+      secure: env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 30 * 24 * 60 * 60 * 1000,
       path: "/api/auth/refresh",
@@ -178,6 +179,7 @@ router.post("/logout", authenticate, async (req: Request, res: Response, next: N
 /** POST /api/auth/verify-email */
 router.post(
   "/verify-email",
+  authLimiter,
   validateBody(verifyEmailSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {

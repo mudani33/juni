@@ -183,24 +183,27 @@ export const AuthService = {
       throw new AuthError("Invalid or expired refresh token");
     }
 
-    // Look up the stored refresh token record
-    const stored = await prisma.refreshToken.findUnique({ where: { jti: payload.jti } });
-    if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
-      throw new AuthError("Refresh token has been revoked or expired");
-    }
+    // Atomically revoke the old token and fetch the user in a single transaction
+    // to eliminate the check-then-act race condition on concurrent refresh requests.
+    const result = await prisma.$transaction(async (tx) => {
+      const stored = await tx.refreshToken.findUnique({ where: { jti: payload.jti } });
+      if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
+        throw new AuthError("Refresh token has been revoked or expired");
+      }
 
-    const user = await prisma.user.findUniqueOrThrow({
-      where: { id: payload.sub },
-      select: { id: true, email: true, role: true },
+      // Mark revoked inside the same transaction — concurrent calls will fail here
+      await tx.refreshToken.update({
+        where: { jti: payload.jti },
+        data: { revokedAt: new Date() },
+      });
+
+      return tx.user.findUniqueOrThrow({
+        where: { id: payload.sub },
+        select: { id: true, email: true, role: true },
+      });
     });
 
-    // Rotate: revoke old token, issue new pair
-    await prisma.refreshToken.update({
-      where: { jti: payload.jti },
-      data: { revokedAt: new Date() },
-    });
-
-    return issueTokenPair(user.id, user.role, user.email);
+    return issueTokenPair(result.id, result.role, result.email);
   },
 
   /** Revoke a specific refresh token (logout) */

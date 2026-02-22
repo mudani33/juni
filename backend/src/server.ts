@@ -17,6 +17,7 @@ import billingRoutes from "./routes/billing.routes.js";
 import messagesRoutes from "./routes/messages.routes.js";
 import checkrRoutes from "./routes/checkr.routes.js";
 import storageRoutes from "./routes/storage.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 
 // ── Webhook imports (raw body parsing required) ──────────────────────────────
 import stripeWebhook from "./webhooks/stripe.webhook.js";
@@ -49,11 +50,17 @@ app.use(
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, Postman) in dev
-      if (!origin || env.NODE_ENV === "development") {
-        return callback(null, true);
+      // Allow requests with no origin only for webhook paths (handled by separate middleware)
+      // For all other requests, enforce origin allowlist
+      if (!origin) {
+        // No origin = native app / curl / server-to-server; reject for browser-facing API
+        return callback(null, false);
       }
       if (origin === env.FRONTEND_URL) {
+        return callback(null, true);
+      }
+      // In dev, also allow localhost variants of the frontend
+      if (env.NODE_ENV === "development" && /^https?:\/\/localhost(:\d+)?$/.test(origin)) {
         return callback(null, true);
       }
       callback(new Error(`CORS: origin '${origin}' not allowed`));
@@ -112,6 +119,7 @@ app.get("/health", (_req, res) => {
 
 app.use("/api", apiLimiter);
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/families", familiesRoutes);
 app.use("/api/companions", companionsRoutes);
 app.use("/api/visits", visitsRoutes);
