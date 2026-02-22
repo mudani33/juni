@@ -12,7 +12,15 @@
  *   await api.post('/auth/login', { email, password });
  */
 
+import { mockResponse } from "./mockApi";
+
 const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3001/api";
+
+// Use mock when VITE_MOCK=true OR when BASE_URL points at localhost
+const IS_MOCK =
+  import.meta.env.VITE_MOCK === "true" ||
+  BASE_URL.includes("localhost") ||
+  BASE_URL.includes("127.0.0.1");
 
 export class ApiError extends Error {
   constructor(message, status, code) {
@@ -60,6 +68,16 @@ let isRefreshing = false;
 let refreshQueue = [];
 
 async function request(method, path, body, options = {}) {
+  // ── Mock mode: no real network calls ──────────────────────────────────────
+  if (IS_MOCK) {
+    try {
+      const data = mockResponse(method, path, body);
+      return data;
+    } catch (err) {
+      throw new ApiError(err.message ?? "Mock error", err.status ?? 400, err.code ?? "MOCK_ERROR");
+    }
+  }
+
   const token = tokenStore.get();
 
   const headers = {
