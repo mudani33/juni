@@ -38,9 +38,9 @@ const companionSteps = [
 ];
 
 const plans = [
-  { name: "Essentials", feats: ["8 hours/month", "Standard matching", "Weekly Summary", "Text Legacy Vault"], no: ["Predictive Alerts", "Partner Integration"] },
-  { name: "Premium", popular: true, feats: ["16 hours/month", "Priority matching", "Per-visit Daily Bloom", "Text + Audio Legacy", "Predictive Alerts"], no: ["Partner Integration"] },
-  { name: "Legacy", feats: ["24+ hours/month", "Concierge matching", "Bloom + Audio per visit", "Full Legacy Vault", "Alerts + Clinical Escalation", "Trust Partner Integration"], no: [] },
+  { name: "Essentials", feats: ["4 visits/month", "Kindred personality matching", "Family dashboard", "Weekly wellness summary", "Post-visit mood snapshots", "Text Legacy Vault"], no: ["Predictive health alerts", "Care partner integration"] },
+  { name: "Premium", popular: true, feats: ["8 visits/month", "Priority Kindred matching", "Family dashboard", "Daily Bloom report per visit", "Text + audio Legacy Vault", "Predictive health alerts"], no: ["Care partner integration"] },
+  { name: "Legacy", feats: ["12+ visits/month", "Concierge matching + dedicated advisor", "Family dashboard", "Full Daily Bloom + trend tracking", "Complete Legacy Vault (text, audio, photo)", "Alerts + clinical escalation", "Care partner & provider integration"], no: [] },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -634,6 +634,27 @@ export default function Landing() {
             </div>
           ))}
         </div>
+
+        {/* Custom plan callout */}
+        <motion.div
+          initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}
+          className="mt-8 rounded-2xl border border-border bg-warm-white p-8 flex flex-col sm:flex-row items-center justify-between gap-6"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-sage-bg flex items-center justify-center shrink-0">
+              <CalendarCheck className="text-sage" size={22} />
+            </div>
+            <div>
+              <h3 className="font-serif text-xl font-semibold m-0 mb-1">Need daily visits or a custom schedule?</h3>
+              <p className="text-sm text-muted font-light m-0">
+                We build custom plans for families who need more frequent companionship — daily visits, specific time blocks, or multi-senior households.
+              </p>
+            </div>
+          </div>
+          <Button variant="secondary" className="shrink-0 whitespace-nowrap" onClick={() => navigate("/onboarding")}>
+            Contact Us <ArrowRight size={14} />
+          </Button>
+        </motion.div>
       </section>
 
       {/* ══════════ Final CTA ══════════ */}
