@@ -38,9 +38,9 @@ const companionSteps = [
 ];
 
 const plans = [
-  { name: "Essentials", feats: ["4 visits/month", "Standard matching", "Weekly Summary", "Text Legacy Vault"], no: ["Predictive Alerts", "Partner Integration"] },
-  { name: "Premium", popular: true, feats: ["8 visits/month", "Priority matching", "Per-visit Daily Bloom", "Text + Audio Legacy", "Predictive Alerts"], no: ["Partner Integration"] },
-  { name: "Legacy", feats: ["12+ visits/month", "Concierge matching", "Bloom + Audio per visit", "Full Legacy Vault", "Alerts + Clinical Escalation", "Trust Partner Integration"], no: [] },
+  { name: "Essentials", feats: ["4 visits/month", "Kindred personality matching", "Weekly wellness summary", "Post-visit mood snapshots", "Text Legacy Vault"], no: ["Predictive health alerts", "Care partner integration"] },
+  { name: "Premium", popular: true, feats: ["8 visits/month", "Priority Kindred matching", "Daily Bloom report per visit", "Text + audio Legacy Vault", "Predictive health alerts", "Family dashboard access"], no: ["Care partner integration"] },
+  { name: "Legacy", feats: ["12+ visits/month", "Concierge matching + dedicated advisor", "Full Daily Bloom + trend tracking", "Complete Legacy Vault (text, audio, photo)", "Alerts + clinical escalation", "Care partner & provider integration"], no: [] },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
